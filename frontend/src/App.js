@@ -12,6 +12,7 @@ import User_profile from "./pages/user_profile";
 import Patient from "./pages/patient";
 import PrescriptionUploadPage from "./pages/uploadPrescription";
 import MedicationSchedule from "./pages/Medication";
+import DisplayImages from "./pages/viewprescription";
 
 function App() {
   return (
@@ -31,7 +32,7 @@ function App() {
           element={<PrescriptionUploadPage />}
         />
         <Route path="/managemedication" element={<MedicationSchedule />} />
-
+        <Route path="/viewprescriptions" element={<DisplayImages />} />
         <Route path="/userprofile" element={<User_profile />} />
       </Routes>
     </Router>

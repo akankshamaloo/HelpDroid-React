@@ -66,25 +66,9 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
           )}
         </li>
         <li className="sidebar-list-item">
-          <div onClick={() => handleClickSection("reminder")}>
+          <a href="/managemedication">
             <BsFillGrid3X3GapFill className="icon" /> Medication Reminder
-          </div>
-          {clickedSection === "reminder" && (
-            <>
-              <ListItem button component="a" href="/addreminder">
-                <ListItemIcon>
-                  <CloudUploadIcon />
-                </ListItemIcon>
-                <ListItemText primary="Add reminders" />
-              </ListItem>
-              <ListItem button component="a" href="/managereminder">
-                <ListItemIcon>
-                  <ManageSearchIcon />
-                </ListItemIcon>
-                <ListItemText primary="Manage Reminders" />
-              </ListItem>
-            </>
-          )}
+          </a>
         </li>
         <li className="sidebar-list-item">
           <div onClick={() => handleClickSection("contacts")}>
