@@ -49,7 +49,7 @@ const Login = () => {
     try {
       if (uemail === "") toast.error("email id cannot be empty");
       if (password === "") toast.error("Password cannot be empty");
-      sessionStorage.setItem("useremail", uemail);
+      sessionStorage.setItem("user_email", uemail);
       try {
         const response = await axios.post("http://localhost:5000/login", {
           email: uemail,
@@ -59,48 +59,45 @@ const Login = () => {
         if (response.status !== 200) {
           toast.error("Invalid credentials");
         }
-        if (response.data.user.is_admin !== active) {
+        if (response.data.role !== active) {
           if (active) {
-            toast.error("Invalid User")
-            setTimeout(() => {
-              toast.error("Account not found in doctor Data");
-            }, 500);
-            setTimeout(() => {
-              toast.info("Try as an patient")
-            }, 1500);
+            toast.error("Account not found in doctor Data \n Try as an patient");
+            // //toast.error("Invalid User")
+            // setTimeout(() => {
+
+            // }, 500);
+            // setTimeout(() => {
+            //   toast.info("Try as an patient")
+            // }, 1500);
             return false
           }
           else {
-            toast.error("Invalid User")
-            setTimeout(() => {
-              toast.error("Account not found in  patient Data")
-            }, 500);
-            setTimeout(() => {
-              toast.info("Try as an doctor")
-            }, 1500);
+            toast.error("Account not found in patient Data \n Try as an doctor");
+            // toast.error("Invalid User")
+            // setTimeout(() => {
+
+            // }, 500);
+            // setTimeout(() => {
+            //   toast.info("Try as an doctor")
+            // }, 1500);
             return false
           }
         }
-        sessionStorage.setItem("data", JSON.stringify(response.data.user));
-        const d = JSON.parse(sessionStorage.getItem("data"));
-        const responseData = response.data.user;
+        //sessionStorage.setItem("data", JSON.stringify(response.data.user));
+        //const d = JSON.parse(sessionStorage.getItem("data"));
+        const responseData = response.data;
         //setData(responseData);
+        console.log(responseData);
 
         if (response.status === 200) {
-          const uname = responseData.userid;
-          const doctor = responseData.is_admin;
+          const user_id = responseData.user_id;
+          const role = responseData.role;
           toast.success("Login successfully");
-          sessionStorage.setItem("auth", "true");
-          sessionStorage.setItem("2fa", responseData.twofa);
-          sessionStorage.setItem("userName", uname);
-          sessionStorage.setItem("userType", doctor);
-
-          const scoreresponse = await axios.post("http://localhost:3000/userscore", {
-            id: response.data.user.userid,
-          });
-          sessionStorage.setItem("score", scoreresponse.data.score);
+          sessionStorage.setItem("user_id", user_id);
+          sessionStorage.setItem("role", role);
+          console.log(role, user_id);
           setTimeout(() => {
-            if (doctor) {
+            if (role) {
               n("/admin");
             } else {
               n("/employee");
@@ -112,10 +109,6 @@ const Login = () => {
         toast.error("Invalid Credentials");
       }
     } catch (error) { }
-  };
-
-  const handleEmployeeSelect = (option) => {
-    //setSelectedOption(option);
   };
 
   // JSX structure for the Login component
