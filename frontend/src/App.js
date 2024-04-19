@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import User_profile from "./pages/user_profile";
 import Patient from "./pages/patient";
 import PrescriptionUploadPage from "./pages/uploadPrescription";
+import MedicationSchedule from "./pages/Medication";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           path="/uploadprescription"
           element={<PrescriptionUploadPage />}
         />
+        <Route path="/managemedication" element={<MedicationSchedule />} />
 
         <Route path="/userprofile" element={<User_profile />} />
       </Routes>
