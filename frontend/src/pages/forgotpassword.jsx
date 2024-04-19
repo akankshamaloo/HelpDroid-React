@@ -36,6 +36,10 @@ export const ForgotPasswordModal = ({ open, onClose }) => {
     console.log("OTP verified:", otp);
     setStep(3);
   };
+  const handleCancel = () => {
+    setStep(1);
+    onClose();
+  };
 
   const handleResendOtp = () => {
     // TODO: Implement resend OTP logic
@@ -91,7 +95,7 @@ export const ForgotPasswordModal = ({ open, onClose }) => {
               <Button variant="contained" onClick={handleVerifyOtp}>
                 Verify
               </Button>
-              <Button variant="outlined" color="error" onClick={onClose}>
+              <Button variant="outlined" color="error" onClick={handleCancel}>
                 Cancel
               </Button>
             </Box>
@@ -126,7 +130,7 @@ export const ForgotPasswordModal = ({ open, onClose }) => {
               >
                 Reset Password
               </Button>
-              <Button variant="outlined" color="error" onClick={onClose}>
+              <Button variant="outlined" color="error" onClick={handleCancel}>
                 Cancel
               </Button>
             </Box>
