@@ -5,12 +5,14 @@ import { MdEmail, MdVisibility, MdVisibilityOff } from "react-icons/md"
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
+import OTPPopup from '../components/OTPPopup.jsx';
 
 const Register = () => {
 
   const n = useNavigate()
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isOTPPopupOpen, setIsOTPPopupOpen] = useState(false);
 
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
@@ -18,6 +20,10 @@ const Register = () => {
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const toggleOtpPopup = () => {
+    setIsOTPPopupOpen(!isOTPPopupOpen);
   };
 
   // Function to handle registration
@@ -70,7 +76,7 @@ const Register = () => {
       toast.info("Password must have \n\nAt least one lowercase letter \n\nAt least one uppercase letter\n\nAt least one digit\n\n At least one special character from the set @$!%*?&\n\nMinimum length of 8 characters.",);
       return false
     }
-
+    setIsOTPPopupOpen(true);
     try {
       // Make API request for registration
       const response = await axios.post('http://localhost:5000/register',
@@ -107,10 +113,32 @@ const Register = () => {
 
   }
 
+  // Function to handle OTP submission
+  const handleOTPSubmit = async (otp) => {
+    // Make API request to submit OTP
+    try {
+      const response = await axios.post('http://localhost:5000/submit-otp', {
+        otp: otp,
+      });
+      // Handle response
+      setIsOTPPopupOpen(false); // Close OTP popup
+      // Additional logic after OTP submission if needed
+    } catch (error) {
+      // Handle error
+      toast.error('Failed to submit OTP.');
+    }
+  }
+
   // JSX structure for the Register component
   return (
     <section className="logindiv" style={{ backgroundColor: "#EDF4F2" }} >
       <ToastContainer />
+      {/* OTP Popup */}
+      <OTPPopup
+        isOpen={isOTPPopupOpen}
+        onClose={() => setIsOTPPopupOpen(false)}
+        onSubmit={handleOTPSubmit}
+      />
       <div className=" flex flex-col items-center justify-center px-6 py-3 mx-auto md:h-screen lg:py-0 ">
         <div className="w-full border-2 rounded-md shadow min-w-[730px]  md:mt-0 sm:max-w-md xl:p-0">
           <div className="px-2 space-y-4 md:space-y-4 sm:p-8" style={{ backgroundColor: "#1995AD" }}>
