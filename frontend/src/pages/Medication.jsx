@@ -32,10 +32,19 @@ import { toast } from "react-toastify";
 // });
 
 function MedicationSchedule() {
-
   const [rows, setRows] = useState([
-    { id: 1, medicationName: "Aspirin", time: "08:00 AM" },
-    { id: 2, medicationName: "Ibuprofen", time: "12:00 PM" },
+    {
+      id: 1,
+      medicationName: "Aspirin",
+      time: "08:00 AM",
+      days: { Sun: 0, Mon: 1, Tue: 1, Wed: 0, Thu: 0, Fri: 0, Sat: 0 },
+    },
+    {
+      id: 2,
+      medicationName: "Ibuprofen",
+      time: "12:00 PM",
+      days: { Sun: 0, Mon: 0, Tue: 1, Wed: 0, Thu: 1, Fri: 0, Sat: 0 },
+    },
   ]);
 
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -56,19 +65,24 @@ function MedicationSchedule() {
     Fri: 0,
     Sat: 0,
   });
+  const formatTime = (time) => {
+    return dayjs(time).format("h:mm A"); // "8:00 AM" or "8:00 PM"
+  };
 
   useEffect(() => {
     try {
       const fetchData = async () => {
-        const response = await axios.post("http://localhost:5000/get-medication", {
-          'email': sessionStorage.getItem('user_email')
-        });
+        const response = await axios.post(
+          "http://localhost:5000/get-medication",
+          {
+            email: sessionStorage.getItem("user_email"),
+          }
+        );
         console.log(response.data);
-        if (response.data.success)
-          setRows(response.data);
+        if (response.data.success) setRows(response.data);
       };
       fetchData();
-    } catch (err) { }
+    } catch (err) {}
   }, []);
 
   const handleDaySelect = (day) => {
@@ -89,12 +103,14 @@ function MedicationSchedule() {
   };
 
   const handleClickOpen = (row) => {
+    console.log("row", row);
     setFormData({
       ...row,
       time: dayjs(row.time), // Ensure this is converted to dayjs object
-      days: { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 },
+      days: row.days,
+      id: row.id,
     });
-
+    setSelectedDays(row.days);
     setOpen(true);
   };
 
@@ -117,10 +133,13 @@ function MedicationSchedule() {
   const handleDelete = async (id) => {
     setRows(rows.filter((row) => row.id !== id));
     try {
-      const response = await axios.post("http://localhost:5000/remove-medication", {
-        'email': sessionStorage.getItem('user_email'),
-        'medication': rows.filter((row) => row.id === id)[0].medicationName
-      });
+      const response = await axios.post(
+        "http://localhost:5000/remove-medication",
+        {
+          email: sessionStorage.getItem("user_email"),
+          medication: rows.filter((row) => row.id === id)[0].medicationName,
+        }
+      );
       console.log(response.data);
       if (response.data.success) {
         console.log("Medication removed successfully");
@@ -129,33 +148,52 @@ function MedicationSchedule() {
         console.log("Failed to remove medication");
         toast.error("Failed to remove medication");
       }
-    }
-    catch (err) { }
+    } catch (err) {}
   };
 
   const handleSave = async () => {
+    const formattedTime = formData.time.format();
+    console.log({
+      email: sessionStorage.getItem("user_email"),
+      medication: formData.medicationName,
+      time: formattedTime,
+      days: formatDaysForApi(),
+    });
     if (formData.id) {
-      setRows(rows?.map((row) => (row.id === formData.id ? formData : row)));
+      setRows(
+        rows?.map((row) =>
+          row.id === formData.id ? { ...formData, days: selectedDays } : row
+        )
+      );
       try {
-        const response = await axios.post("http://localhost:5000/edit-medication", {
-          'email': sessionStorage.getItem('user_email'),
-          'medication': formData.medicationName,
-          'time': formData.time,
-          'days': formatDaysForApi()
-        });
-      } catch (err) { }
-    }
-    else {
-      setRows([...rows, { ...formData, id: rows.length + 1 }]);
+        const response = await axios.post(
+          "http://localhost:5000/edit-medication",
+          {
+            email: sessionStorage.getItem("user_email"),
+            medication: formData.medicationName,
+            time: formattedTime,
+            days: selectedDays,
+          }
+        );
+      } catch (err) {}
+    } else {
+      setRows([
+        ...rows,
+        { ...formData, days: selectedDays, id: rows.length + 1 },
+      ]);
       try {
-        const response = await axios.post("http://localhost:5000/upload-medication", {
-          'email': sessionStorage.getItem('user_email'),
-          'medication': formData.medicationName,
-          'time': formData.time,
-          'days': formatDaysForApi()
-        });
-      } catch (err) { }
+        const response = await axios.post(
+          "http://localhost:5000/upload-medication",
+          {
+            email: sessionStorage.getItem("user_email"),
+            medication: formData.medicationName,
+            time: formattedTime,
+            days: selectedDays,
+          }
+        );
+      } catch (err) {}
     }
+
     handleClose();
   };
 
@@ -163,7 +201,32 @@ function MedicationSchedule() {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   };
+  const renderDayCells = (params) => {
+    const daysValues = params.value || {};
+    return (
+      <Stack direction="row" spacing={1}>
+        {weekdays.map((day) => {
+          const isSelected = parseInt(daysValues[day]) === 1;
 
+          return (
+            <Chip
+              key={day}
+              label={day}
+              sx={{
+                bgcolor: isSelected ? "white" : "transparent",
+                color: isSelected ? "black" : "white",
+                border: "1px solid white",
+                "&:hover": {
+                  bgcolor: isSelected ? "lightblue" : "white",
+                  color: "black",
+                },
+              }}
+            />
+          );
+        })}
+      </Stack>
+    );
+  };
   const columns = [
     {
       field: "medicationName",
@@ -174,50 +237,18 @@ function MedicationSchedule() {
       field: "time",
       headerName: "Time",
       width: 150,
+      renderCell: (params) => {
+        // If time is a dayjs object or can be parsed by dayjs
+        const formattedTime = dayjs(params.value).format("h:mm A");
+        return <span>{formattedTime}</span>;
+      },
     },
+
     {
       field: "days",
       headerName: "Days",
       width: 550,
-      renderCell: (params) => {
-        const daysValues = params.value || {};
-        return (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              gap: 0.5,
-              width: "100%",
-            }}
-          >
-            {weekdays.map((day) => {
-              const isSelected = daysValues[day] === 1;
-              return (
-                <Chip
-                  key={day}
-                  label={day}
-                  size="small"
-                  sx={{
-                    width: 48, // Increase width to fit full weekdays
-                    height: 48, // Increase height to make it circular
-                    borderRadius: "50%",
-                    backgroundColor: isSelected ? "blue" : "transparent",
-                    border: "1px solid #fff",
-                    color: isSelected ? "#fff" : "#fff",
-                    fontWeight: isSelected ? "bold" : "normal",
-                    ".MuiChip-label": {
-                      // Ensure the text is centered
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    },
-                  }}
-                />
-              );
-            })}
-          </Box>
-        );
-      },
+      renderCell: renderDayCells,
     },
     {
       field: "actions",
