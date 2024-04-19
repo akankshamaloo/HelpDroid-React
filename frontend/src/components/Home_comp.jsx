@@ -1,10 +1,21 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   BsFillArchiveFill,
   BsFillGrid3X3GapFill,
   BsPeopleFill,
   BsFillBellFill,
 } from "react-icons/bs";
+import { FaBold, FaHeart } from "react-icons/fa"; // Assuming you're using Font Awesome
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import ThermostatIcon from "@mui/icons-material/Thermostat";
+import PulseIcon from "@mui/icons-material/Favorite"; // Assuming you're using this for pulse
+import OxygenIcon from "@mui/icons-material/Air"; // This is an assumption, replace with the actual icon you wish to use
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder"; // Assuming this is for pulse rate
+
 import {
   BarChart,
   Bar,
@@ -20,49 +31,61 @@ import {
 } from "recharts";
 
 function Home_Comp() {
-  const data = [
+  const [isEmergency, setEmergency] = useState(false);
+  const [prescriptions, setPrescriptions] = useState(0);
+  const [reminders, setReminders] = useState(0);
+  const [doctors, setDoctors] = useState(0);
+  const [alerts, setAlerts] = useState(0);
+  const [temperature, setTemperature] = useState(0);
+  const [pulse, setPulse] = useState(0);
+  const [oxygenLevel, setOxygenLevel] = useState(0);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const endpoints = [
+          "api/prescriptions/count", // Replace with your actual endpoint
+          "api/reminders/count", // Replace with your actual endpoint
+          "api/doctors/count", // Replace with your actual endpoint
+          "api/alerts/count", // Replace with your actual endpoint
+        ];
+        const promises = endpoints.map((endpoint) =>
+          fetch(endpoint).then((res) => res.json())
+        );
+        const results = await Promise.all(promises);
+
+        setPrescriptions(results[0].count);
+        setReminders(results[1].count);
+        setDoctors(results[2].count);
+        setAlerts(results[3].count);
+      } catch (error) {
+        console.error("Failed to fetch counts:", error);
+      }
+    };
+
+    fetchCounts();
+  }, []); //
+
+  const dummyData = [
     {
-      name: "Page A",
-      uv: 4000,
-      pv: 2400,
-      amt: 2400,
+      date: "2024-04-14",
+      spo2: 98,
+      temperature: 98.6,
+      pulse: 70,
     },
     {
-      name: "Page B",
-      uv: 3000,
-      pv: 1398,
-      amt: 2210,
+      date: "2024-04-15",
+      spo2: 97,
+      temperature: 99.0,
+      pulse: 75,
     },
     {
-      name: "Page C",
-      uv: 2000,
-      pv: 9800,
-      amt: 2290,
+      date: "2024-04-16",
+      spo2: 99,
+      temperature: 97.8,
+      pulse: 72,
     },
-    {
-      name: "Page D",
-      uv: 2780,
-      pv: 3908,
-      amt: 2000,
-    },
-    {
-      name: "Page E",
-      uv: 1890,
-      pv: 4800,
-      amt: 2181,
-    },
-    {
-      name: "Page F",
-      uv: 2390,
-      pv: 3800,
-      amt: 2500,
-    },
-    {
-      name: "Page G",
-      uv: 3490,
-      pv: 4300,
-      amt: 2100,
-    },
+    // ... more dummy data ...
   ];
 
   return (
@@ -74,31 +97,31 @@ function Home_Comp() {
       <div className="main-cards">
         <div className="card">
           <div className="card-inner">
-            <h3>PRODUCTS</h3>
+            <h3>Prescritption Uploaded</h3>
             <BsFillArchiveFill className="card_icon" />
           </div>
-          <h1>300</h1>
+          <h1>{prescriptions}</h1>
         </div>
         <div className="card">
           <div className="card-inner">
-            <h3>CATEGORIES</h3>
+            <h3>Medication Reminders</h3>
             <BsFillGrid3X3GapFill className="card_icon" />
           </div>
-          <h1>12</h1>
+          <h1>{reminders}</h1>
         </div>
         <div className="card">
           <div className="card-inner">
-            <h3>CUSTOMERS</h3>
+            <h3>Doctors </h3>
             <BsPeopleFill className="card_icon" />
           </div>
-          <h1>33</h1>
+          <h1>{doctors}</h1>
         </div>
         <div className="card">
           <div className="card-inner">
             <h3>ALERTS</h3>
             <BsFillBellFill className="card_icon" />
           </div>
-          <h1>42</h1>
+          <h1>{alerts}</h1>
         </div>
       </div>
 
@@ -127,9 +150,7 @@ function Home_Comp() {
 
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
-            width={1000}
-            height={600}
-            data={data}
+            data={dummyData}
             margin={{
               top: 5,
               right: 30,
@@ -138,18 +159,70 @@ function Home_Comp() {
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
+            <XAxis dataKey="date" />
             <YAxis />
             <Tooltip />
             <Legend />
             <Line
               type="monotone"
-              dataKey="pv"
+              dataKey="spo2"
               stroke="#8884d8"
-              activeDot={{ r: 8 }}
+              strokeWidth={3}
+              name="SpO2 Level"
             />
-            <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
+            <Line
+              type="monotone"
+              dataKey="temperature"
+              stroke="#82ca9d"
+              strokeWidth={3}
+              name="Temperature (°F)"
+            />
+            <Line
+              type="monotone"
+              dataKey="pulse"
+              stroke="#FF8042"
+              strokeWidth={3}
+              name="Pulse Rate"
+            />
           </LineChart>
+        </ResponsiveContainer>
+        <ResponsiveContainer height="100%">
+          <Paper
+            elevation={3}
+            className="health-parameters"
+            style={{
+              margin: "1rem",
+              padding: "1rem",
+              backgroundColor: "#fff0f0",
+            }}
+          >
+            <Card>
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  component="div"
+                  style={{ marginBottom: "0.5rem", font: FaBold }}
+                >
+                  Your Last Health Parameters
+                </Typography>
+                <Typography
+                  variant="body2"
+                  style={{ marginBottom: "0.5rem", fontSize: "1rem" }}
+                >
+                  <OxygenIcon /> SpO2 Level: {oxygenLevel}%
+                </Typography>
+                <Typography
+                  variant="body2"
+                  style={{ marginBottom: "0.5rem", fontSize: "1rem" }}
+                >
+                  <ThermostatIcon /> Temperature: {temperature}°F
+                </Typography>
+                <Typography variant="body2" style={{ fontSize: "1rem" }}>
+                  <FavoriteBorderIcon /> Pulse Rate: {pulse} bpm
+                </Typography>
+              </CardContent>
+            </Card>
+          </Paper>
         </ResponsiveContainer>
       </div>
     </main>
