@@ -9,7 +9,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
-import { Box, useTheme } from "@mui/material";
+import { Box, useTheme, Chip, Stack } from "@mui/material";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -34,12 +34,36 @@ function MedicationSchedule() {
     { id: 1, medicationName: "Aspirin", time: "08:00 AM" },
     { id: 2, medicationName: "Ibuprofen", time: "12:00 PM" },
   ]);
+  const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     id: null,
     medicationName: "",
     time: dayjs(), // Initialize with current time as a dayjs object
+    days: { Sun: 0, Mon: 0, Tue: 1, Wed: 0, Thu: 0, Fri: 0, Sat: 0 },
   });
+  const [selectedDays, setSelectedDays] = useState({
+    Sun: 0,
+    Mon: 0,
+    Tue: 0,
+    Wed: 0,
+    Thu: 0,
+    Fri: 0,
+    Sat: 0,
+  });
+  const handleDaySelect = (day) => {
+    setSelectedDays({
+      ...selectedDays,
+      [day]: selectedDays[day] ? 0 : 1, // Toggle the day selection
+    });
+  };
+  const formatDaysForApi = () => {
+    return weekdays.reduce((acc, day) => {
+      acc[day] = selectedDays[day] || 0; // Default to 0 if not set
+      return acc;
+    }, {});
+  };
 
   const handleFileChange = (event) => {
     setFormData({ ...formData, time: event.target.value });
@@ -49,16 +73,25 @@ function MedicationSchedule() {
     setFormData({
       ...row,
       time: dayjs(row.time), // Ensure this is converted to dayjs object
+      days: { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 },
     });
+
     setOpen(true);
   };
 
   const handleClose = () => {
+    setSelectedDays({ Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 });
+
     setOpen(false);
   };
 
   const handleAdd = () => {
-    setFormData({ id: null, medicationName: "", time: dayjs() }); // Reset using dayjs
+    setFormData({
+      id: null,
+      medicationName: "",
+      time: dayjs(),
+      days: { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 },
+    }); // Reset using dayjs
     setOpen(true);
   };
 
@@ -71,6 +104,8 @@ function MedicationSchedule() {
       setRows(rows.map((row) => (row.id === formData.id ? formData : row)));
     } else {
       setRows([...rows, { ...formData, id: rows.length + 1 }]);
+      try {
+      } catch (err) {}
     }
     handleClose();
   };
@@ -84,18 +119,61 @@ function MedicationSchedule() {
     {
       field: "medicationName",
       headerName: "Medication Name",
-      width: 180,
+      width: 200,
     },
     {
       field: "time",
       headerName: "Time",
-      width: 130,
+      width: 150,
     },
-
+    {
+      field: "days",
+      headerName: "Days",
+      width: 550,
+      renderCell: (params) => {
+        const daysValues = params.value || {};
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 0.5,
+              width: "100%",
+            }}
+          >
+            {weekdays.map((day) => {
+              const isSelected = daysValues[day] === 1;
+              return (
+                <Chip
+                  key={day}
+                  label={day}
+                  size="small"
+                  sx={{
+                    width: 48, // Increase width to fit full weekdays
+                    height: 48, // Increase height to make it circular
+                    borderRadius: "50%",
+                    backgroundColor: isSelected ? "blue" : "transparent",
+                    border: "1px solid #fff",
+                    color: isSelected ? "#fff" : "#fff",
+                    fontWeight: isSelected ? "bold" : "normal",
+                    ".MuiChip-label": {
+                      // Ensure the text is centered
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    },
+                  }}
+                />
+              );
+            })}
+          </Box>
+        );
+      },
+    },
     {
       field: "actions",
       headerName: "Actions",
-      width: 130,
+      width: 120,
       headerClassName: "super-app-theme--header",
       cellClassName: "super-app-theme--cell",
       renderCell: (params) => (
@@ -116,15 +194,20 @@ function MedicationSchedule() {
       ),
     },
   ];
-
+  function getWeekdayAbbreviation(time) {
+    // Assuming `time` is a string with the format 'DayName HH:MM AM/PM', e.g., 'Monday 08:00 AM'
+    // Extract the day name and get the first three characters
+    const dayName = dayjs(time, "dddd HH:mm A").format("ddd"); // Format to get day abbreviation
+    return dayName;
+  }
   return (
-    <Box sx={{ display: "flex", height: "100vh", backgroundColor: "#000" }}>
+    <Box sx={{ display: "flex", height: "95vh" }}>
       <Sidebar OpenSidebar={true} />
       <Box
         sx={{
           flexGrow: 1,
           padding: "1rem",
-          backgroundColor: "#121212",
+
           height: "100%",
         }}
       >
@@ -138,13 +221,16 @@ function MedicationSchedule() {
         </Button>
 
         <DataGrid
-          rows={rows}
-          columns={columns}
+          rows={rows.map((row) => ({
+            ...row,
+            weekday: getWeekdayAbbreviation(row.time), // Add the weekday field to each row
+          }))}
+          columns={columns.map((column) => ({
+            ...column,
+            headerAlign: "center", // This aligns the header text to the center
+          }))}
           pageSize={5}
           sx={{
-            "& .MuiDataGrid-columnHeaders": {
-              color: "white",
-            },
             "& .MuiDataGrid-cell": {
               color: "white",
             },
@@ -154,6 +240,14 @@ function MedicationSchedule() {
             ".MuiDataGrid-root .MuiDataGrid-cell": {
               color: "white", // This specifically changes the text color of the cells
             },
+            "& .MuiDataGrid-cell": {
+              textAlign: "center", // Centers the text in cells
+              display: "flex",
+              alignItems: "center", // Vertically center the content in cells
+              justifyContent: "center",
+              color: "white",
+              // Horizontally center the content in cells
+            },
           }}
         />
 
@@ -161,11 +255,7 @@ function MedicationSchedule() {
           <DialogTitle>
             {formData.id ? "Edit Medication" : "Add Medication"}
           </DialogTitle>
-          <DialogContent
-            sx={{
-              width: 500, // Set your desired width here
-            }}
-          >
+          <DialogContent>
             <TextField
               autoFocus
               margin="dense"
@@ -174,10 +264,8 @@ function MedicationSchedule() {
               type="text"
               fullWidth
               value={formData.medicationName}
+              disabled={formData.id ? true : false}
               onChange={handleChange}
-              InputProps={{
-                style: { color: "white" },
-              }}
             />
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["TimePicker"]}>
@@ -190,29 +278,40 @@ function MedicationSchedule() {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      sx={{ width: "100%" }} // This will also make it full width
+                      fullWidth // Ensures that the TextField for TimePicker takes full width
                       InputProps={{
                         ...params.InputProps,
                         style: { color: "white" },
                       }}
                     />
                   )}
+                  sx={{ marginBottom: 2 }} // Match the TextField styles and spacing
                 />
               </DemoContainer>
             </LocalizationProvider>
-            {/* <TimePicker
-                label="Time"
-                value={formData.time}
-                onChange={(newTime) => {
-                  setFormData({ ...formData, time: newTime });
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    InputProps={{ style: { color: "white" } }}
-                  />
-                )}
-              /> */}
+            <Stack direction="row" spacing={1} sx={{ marginY: 2 }}>
+              {Object.keys(selectedDays).map((day) => (
+                <Chip
+                  label={day}
+                  key={day}
+                  onClick={() => handleDaySelect(day)}
+                  color={selectedDays[day] ? "primary" : "default"}
+                  variant={selectedDays[day] ? "filled" : "outlined"}
+                  sx={{
+                    borderRadius: "50%",
+                    width: 36,
+                    height: 36,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    fontSize: "0.75rem",
+                    "& .MuiChip-label": {
+                      padding: 0,
+                    },
+                  }}
+                />
+              ))}
+            </Stack>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose} color="primary">
