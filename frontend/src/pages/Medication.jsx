@@ -15,6 +15,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import Sidebar from "../components/Sidebar";
+import dayjs from "dayjs";
 
 // Styles for the DataGrid columns
 // const useStyles = makeStyles({
@@ -37,7 +38,7 @@ function MedicationSchedule() {
   const [formData, setFormData] = useState({
     id: null,
     medicationName: "",
-    time: new Date(),
+    time: dayjs(), // Initialize with current time as a dayjs object
   });
 
   const handleFileChange = (event) => {
@@ -45,7 +46,10 @@ function MedicationSchedule() {
   };
 
   const handleClickOpen = (row) => {
-    setFormData(row);
+    setFormData({
+      ...row,
+      time: dayjs(row.time), // Ensure this is converted to dayjs object
+    });
     setOpen(true);
   };
 
@@ -54,7 +58,7 @@ function MedicationSchedule() {
   };
 
   const handleAdd = () => {
-    setFormData({ id: null, medicationName: "", time: new Date() });
+    setFormData({ id: null, medicationName: "", time: dayjs() }); // Reset using dayjs
     setOpen(true);
   };
 
