@@ -25,10 +25,8 @@ collection = db['User']
 def insert_data(email,password,mobile,name,role):
     # data = {'email': email, 'password': password,'mobile':mobile, 'name': name}
     # collection.insert_one(data)
-    try:
-        
-        hash = sha256.sha256(password+""+email)
-        
+    try:        
+        hash = sha256.sha256(password+""+email)        
         data = {'email': email, 'password': hash,'mobile':mobile, 'name': name, 'role':role}
         print(data)
         id=collection.insert_one(data)
@@ -43,6 +41,7 @@ def update(email_input,new_pass):
     filter_criteria = {"email": email_input}
 
     # Define the update operation (e.g., set a new value for a field)
+    new_pass = sha256.sha256(new_pass+""+email_input)
     update_operation = {"$set": {"password": new_pass}}
 
     # Update the document in the collection
@@ -69,26 +68,22 @@ def loginotpcheck(email_input):
     return None,None
 
 
-def append_encrypted_image_to_prescription(path):
+def append_encrypted_image_to_prescription(path,email):
     # Encrypt the image data
+    
+    email = email
+    encrypted_image = encrypted(path)
 
-    # Append the encrypted image to the prescription array of the document identified by the email
-    if os.path.exists('session.json'):
-        with open('session.json', 'r') as session_file:
-            session_data = json.load(session_file)
-            email = session_data.get('user_email')
-            encrypted_image = encrypted(path)
+    result = collection.update_one(
+        {"email": email},
+        {"$push": {"prescription_images": encrypted_image}}
+    )
 
-            result = collection.update_one(
-                {"email": email},
-                {"$push": {"prescription_images": encrypted_image}}
-            )
-
-            # Check if the update was successful
-            if result.modified_count > 0:
-                print(f"Image appended to prescription for {email}")
-            else:
-                print(f"No document found with email {email} or no update was needed.")
+    # Check if the update was successful
+    if result.modified_count > 0:
+        print(f"Image appended to prescription for {email}")
+    else:
+        print(f"No document found with email {email} or no update was needed.")
 
                 
 def fetch_and_decrypt_prescription_images():
@@ -303,16 +298,12 @@ def delete_appointment(p_name,apt_detail):
         print(f"Error: {e}")
         return False
 
-def insert_medication(med_name,med_time):
-    email = read_email_from_session()
+def insert_medication(email,days,med_time,med_name):
     if not email:
         print("No email found in session.")
         return
 
-    if med_name is None or med_time is None:
-        return
-
-    med_data = {"name": med_name, "time": med_time}
+    med_data = {"name": med_name, "time": med_time, "days": days}
 
     try:
         # Update the existing user document to add the contact
@@ -322,18 +313,19 @@ def insert_medication(med_name,med_time):
             upsert=False
         )
         
-        
         if update_result.modified_count > 0:
             print("medication inserted successfully.")
-            schedule_medication_notification(med_name, med_time)
+            schedule_medication_notification(med_name, med_time, days)
             return True
         else:
-            print("No update was made, possibly because the contact already exists.")
+            print("No update was made.")
             return False
 
     except Exception as e:
         print(f"Error: {e}")
         return False
+    
+    
 def get_medications_details():
     email = read_email_from_session()
     # Replace with your collection name

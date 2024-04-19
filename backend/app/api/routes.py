@@ -76,4 +76,73 @@ def setup_routes(app):
             return jsonify({'success': True, 'message': 'OTP verified successfully'}), 200
         else:
             return jsonify({'success': False, 'message': 'Invalid OTP'}), 401
+        
+    @app.route('/forgot-password', methods=['POST'])
+    def forgot_password():
+        email = request.json.get('email')
+        password = request.json.get('password')
+        if not email:
+            return jsonify({'success': False, 'message': 'Email is required'}), 400       
+        try:
+            update(email,password)
+            print(email,password)
+            return jsonify({'success': True, 'message': 'Password successfully'}), 200
+        except Exception as e:
+            return jsonify({'success': False, 'message': str(e)}), 500
+        
+    @app.route('/upload-prescription', methods=['POST'])
+    def upload_prescription():
+        data = request.get_json()
+        email = data.get('email')
+        path = data.get('path')
+        if not all([email, path]):
+            return jsonify({'data': 'Missing required fields'}), 400
+        try:
+            # Get the size of the file in kilobytes (KB)
+            file_size_kb = path.getsize(path) / 1024
+            # Check if the file size is less than or equal to 300 KB
+            if file_size_kb <= 300:
+                # Call the encryption function
+                append_encrypted_image_to_prescription(path,email)  # Call the encryption function
+                print(f"File path: {path} (Size: {file_size_kb:.2f} KB)")
+                return jsonify({'data': 'Prescription uploaded successfully'}), 200
+            else:
+                # File is too large, notify the user
+                return jsonify({'data': 'Choose a file within 300 KB'}), 500
+            
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+    
+
+    @app.route('/get-prescription', methods=['POST'])
+
+    @app.route('/upload-medication', methods=['POST'])
+    def upload_medication():
+        data=request.get_json()
+        email=data.get('email')
+        days=data.get('days')
+        time=data.get('time')
+        medicine=data.get('medicine')
+        if not all([email,days,time,medicine]):
+            return jsonify({'data': 'Missing required fields'}), 400
+        try:
+            success=insert_medication(email,days,time,medicine)
+            if success:
+                return jsonify({'data': 'Medication uploaded successfully'}), 200
+            else:
+                return jsonify({'data': 'Medication upload failed'}), 401
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+        
+    @app.route('/get-medication', methods=['POST'])
+    def get_medication():
+        email=request.json.get('email')
+        if not email:
+            return jsonify({'data': 'Missing required fields'}), 400
+        try:
+            data=get_medication(email)
+            return jsonify({'data': data}), 200
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+            
     
