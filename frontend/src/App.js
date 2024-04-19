@@ -32,7 +32,7 @@ function App() {
           element={<PrescriptionUploadPage />}
         />
         <Route path="/managemedication" element={<MedicationSchedule />} />
-        <Route path="/viewprescriptions" element={<DisplayImages />} />
+        <Route path="/managepresciption" element={<DisplayImages />} />
         <Route path="/userprofile" element={<User_profile />} />
       </Routes>
     </Router>

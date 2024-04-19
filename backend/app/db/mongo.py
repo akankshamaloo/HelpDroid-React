@@ -7,6 +7,7 @@ from app.crypto.triple_des import decrypted, encrypted
 from app.features.notification import *
 from datetime import datetime
 from bson.objectid import ObjectId
+import base64
 
 # Replace with your MongoDB connection string
 mongo_uri = 'mongodb+srv://sonadas8april:riyadasdas@cluster0.x0jnn5h.mongodb.net/'
@@ -86,36 +87,27 @@ def append_encrypted_image_to_prescription(path,email):
         print(f"No document found with email {email} or no update was needed.")
 
                 
-def fetch_and_decrypt_prescription_images():
+def fetch_and_decrypt_prescription_images(email):
     # Fetch the document for the given email
+    document = collection.find_one({"email": email})
 
-    if os.path.exists('session.json'):
-        with open('session.json', 'r') as session_file:
-            session_data = json.load(session_file)
-            email = session_data.get('user_email')
-            document = collection.find_one({"email": email})
+    # Check if the document was found
+    if document:
+        encrypted_images = document.get("prescription_images", [])
 
-            # Check if the document was found
-            if document:
-                encrypted_images = document.get("prescription_images", [])
+        decrypted_images = []
+        for encrypted_image in encrypted_images:
+            image_bytes = decrypted(encrypted_image)  # This function should decrypt the image
+            base64_encoded = base64.b64encode(image_bytes).decode('utf-8')
+            decrypted_images.append(base64_encoded)
 
-                decrypted_images = []
-                for encrypted_image in encrypted_images:
-                    image_bytes = decrypted(encrypted_image)  # Replace with your decryption method
-                    # Save the decrypted image to a temporary file
-                    with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_file:
-                        temp_file.write(image_bytes)
-                        temp_file_path = temp_file.name
-                    decrypted_images.append({
-                        "path": temp_file_path,
-                        "subtitle": "Decrypted Image"
-                    })
-                return decrypted_images
-            
-            
-            else:
-                print(f"No document found with email {email}")
-                return []
+
+        return decrypted_images
+    
+    
+    else:
+        print(f"No document found with email {email}")
+        return []
 
  
 
@@ -325,7 +317,7 @@ def insert_medication(email,days,med_time,med_name):
         print(f"Error: {e}")
         return False
     
-    
+
 def get_medications_details():
     email = read_email_from_session()
     # Replace with your collection name

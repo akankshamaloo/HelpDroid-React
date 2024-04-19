@@ -135,6 +135,17 @@ def setup_routes(app):
     
 
     @app.route('/get-prescription', methods=['POST'])
+    def get_prescription():
+        email = request.json.get('email')
+        if not email:
+            return jsonify({'data': 'Missing required fields'}), 400
+
+        try:
+            data = fetch_and_decrypt_prescription_images(email)
+            return jsonify({'data': data}), 200
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+
 
     @app.route('/upload-medication', methods=['POST'])
     def upload_medication():
