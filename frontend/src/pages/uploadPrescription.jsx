@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button, TextField, Typography, Paper, Box } from "@mui/material";
 import Sidebar from "../components/Sidebar";
+import { toast } from "react-toastify";
 
 function PrescriptionUploadPage() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -9,40 +10,69 @@ function PrescriptionUploadPage() {
     setSelectedFile(event.target.files[0]);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
+  const handleFileRead = async () => {
     if (!selectedFile) {
-      alert("Please select a file to upload.");
+      toast.error("No file selected!");
       return;
     }
 
+    const reader = new FileReader();
+
+    // This event handler will be called once the read operation is complete
+    reader.onload = function (event) {
+      const fileContent = event.target.result;
+      // Here, `fileContent` contains the binary content of the file
+      console.log("File content:", fileContent);
+      // You can handle the file content here, e.g., send it to a server or process it
+    };
+
+    reader.onerror = function () {
+      toast.error("Error reading file!");
+    };
+
+    // Read the file as a data URL (base64 encoded string of the file data)
+    reader.readAsDataURL(selectedFile);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
     const formData = new FormData();
-    formData.append("prescription", selectedFile);
+    formData.append("file", selectedFile);
 
-    // Replace 'your-api-endpoint' with your actual API endpoint
-    const response = await fetch("your-api-endpoint", {
-      method: "POST",
-      body: formData,
-      // Include other headers if necessary, like authentication tokens
-    });
+    try {
+      const response = await fetch("your-api-endpoint", {
+        method: "POST",
+        body: formData,
+      });
 
-    if (response.ok) {
-      // Handle success
-      alert("Prescription uploaded successfully!");
-      // Clear the selected file if necessary
-      setSelectedFile(null);
-    } else {
-      // Handle error
-      alert("Upload failed. Please try again.");
+      if (response.ok) {
+        toast.success("Prescription uploaded successfully!");
+        setSelectedFile(null); // Clear the file input after successful upload
+      } else {
+        const errorMsg = await response.text();
+        toast.error("Upload failed: " + errorMsg);
+      }
+    } catch (error) {
+      toast.error("An error occurred: " + error.message);
     }
   };
 
   return (
-    <>
+    <Box sx={{ display: "flex", height: "100vh", backgroundColor: "#000000" }}>
       <Sidebar OpenSidebar={true} />
-      <Paper elevation={3} sx={{ p: 4, mt: 4, mx: "auto", maxWidth: 600 }}>
-        <Typography variant="h4" gutterBottom>
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          mt: 4,
+          flexGrow: 1,
+          maxWidth: "80%",
+          mx: "auto",
+          backgroundColor: "#FFFFFF",
+        }}
+      >
+        <Typography variant="h4" gutterBottom textAlign="center">
           Upload Your Prescription
         </Typography>
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
@@ -83,7 +113,7 @@ function PrescriptionUploadPage() {
           </Button>
         </Box>
       </Paper>
-    </>
+    </Box>
   );
 }
 
