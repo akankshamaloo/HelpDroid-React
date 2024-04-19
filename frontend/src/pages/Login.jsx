@@ -2,15 +2,20 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
+
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import "../index.css";
-import Fpm from "../components/forgotpassmail";
 import { MdEmail } from "react-icons/md";
+import { ForgotPasswordModal } from "./forgotpassword";
 
 const Login = () => {
   const [isvisible, setIsvisible] = useState(false);
   const [active, setActive] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleOpenModal = () => setModalOpen(true);
+  const handleCloseModal = () => setModalOpen(false);
   const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
   const n = useNavigate();
 
@@ -30,6 +35,7 @@ const Login = () => {
   // Function to handle forgot password
   function fp() {
     setIsvisible(!isvisible);
+    setModalOpen(true);
   }
 
   // Function to handle login
@@ -165,13 +171,13 @@ const Login = () => {
               </div>
             </div>
             {/* Forgot password link */}
-            {isvisible && (
+            {/* {isvisible && (
               <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-filter backdrop-blur-sm">
                 <div className="bg-white p-8 rounded-lg ">
                   <Fpm func={fp} mail={"email3"} />
                 </div>
               </div>
-            )}
+            )} */}
 
             <button
               onClick={fp}
@@ -180,6 +186,7 @@ const Login = () => {
             >
               Forgot password?
             </button>
+            <ForgotPasswordModal open={modalOpen} onClose={handleCloseModal} />
             <button
               type="submit"
               className="btn animation"
@@ -269,14 +276,13 @@ const Login = () => {
               </div>
             </div>
             {/* Forgot password link */}
-            {isvisible && (
+            {/* {isvisible && (
               <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-filter backdrop-blur-sm">
                 <div className="bg-white p-8 rounded-lg ">
                   <Fpm func={fp} mail={"email4"} />
                 </div>
               </div>
-            )}
-
+            )} */}
             <button
               onClick={fp}
               className="text-sm -ml-20 mb-3 font-bold animation text-cyan-500 hover:underline "

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Button, TextField, Typography, Paper, Box } from "@mui/material";
+import Sidebar from "../components/Sidebar";
 
 function PrescriptionUploadPage() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -38,48 +39,51 @@ function PrescriptionUploadPage() {
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 4, mt: 4, mx: "auto", maxWidth: 600 }}>
-      <Typography variant="h4" gutterBottom>
-        Upload Your Prescription
-      </Typography>
-      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-        <TextField
-          variant="outlined"
-          margin="normal"
-          required
-          fullWidth
-          name="prescription"
-          type="file"
-          onChange={handleFileChange}
-          inputProps={{ accept: "image/*,.pdf" }}
-        />
-        {selectedFile && (
-          <Box sx={{ my: 2 }}>
-            <Typography>Selected file: {selectedFile.name}</Typography>
-            {selectedFile && selectedFile.type.startsWith("image") && (
-              <img
-                src={URL.createObjectURL(selectedFile)}
-                alt="Preview"
-                style={{
-                  maxHeight: "200px",
-                  maxWidth: "100%",
-                  objectFit: "contain",
-                }}
-              />
-            )}
-          </Box>
-        )}
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          color="primary"
-          sx={{ mt: 3, mb: 2 }}
-        >
-          Upload Prescription
-        </Button>
-      </Box>
-    </Paper>
+    <>
+      <Sidebar OpenSidebar={true} />
+      <Paper elevation={3} sx={{ p: 4, mt: 4, mx: "auto", maxWidth: 600 }}>
+        <Typography variant="h4" gutterBottom>
+          Upload Your Prescription
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            name="prescription"
+            type="file"
+            onChange={handleFileChange}
+            inputProps={{ accept: "image/*,.pdf" }}
+          />
+          {selectedFile && (
+            <Box sx={{ my: 2 }}>
+              <Typography>Selected file: {selectedFile.name}</Typography>
+              {selectedFile && selectedFile.type.startsWith("image") && (
+                <img
+                  src={URL.createObjectURL(selectedFile)}
+                  alt="Preview"
+                  style={{
+                    maxHeight: "200px",
+                    maxWidth: "100%",
+                    objectFit: "contain",
+                  }}
+                />
+              )}
+            </Box>
+          )}
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Upload Prescription
+          </Button>
+        </Box>
+      </Paper>
+    </>
   );
 }
 

@@ -1,8 +1,9 @@
 import React, { useState } from "react";
+import { Outlet } from "react-router-dom";
 import Header from "./header";
 import Sidebar from "./Sidebar";
 
-const Layout = ({ children }) => {
+const Layout = () => {
   const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
 
   const toggleSidebar = () => {
@@ -16,7 +17,9 @@ const Layout = ({ children }) => {
         openSidebarToggle={openSidebarToggle}
         OpenSidebar={toggleSidebar}
       />
-      <div className="content">{children}</div>
+      <div className="content">
+        <Outlet /> {/* This replaces the {children} */}
+      </div>
     </div>
   );
 };

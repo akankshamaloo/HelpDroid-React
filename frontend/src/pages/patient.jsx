@@ -5,7 +5,7 @@ import Sidebar from "../components/Sidebar";
 import Home_Comp from "../components/Home_comp";
 
 function Patient() {
-  const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
+  const [openSidebarToggle, setOpenSidebarToggle] = useState(true);
 
   const OpenSidebar = () => {
     setOpenSidebarToggle(!openSidebarToggle);

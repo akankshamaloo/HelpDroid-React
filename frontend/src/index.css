@@ -170,7 +170,7 @@ body {
   right: 0;
   transform: translateY(-50%);
   font-size: 18px;
-  color: #fff;
+  color: #101010;
   transition: .5s;
 }
 
@@ -390,6 +390,7 @@ body {
   margin-top: 10px;
   cursor: pointer;
 }
+
 
 .grid-container {
   display: grid;
