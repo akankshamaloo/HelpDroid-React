@@ -12,6 +12,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isOTPPopupOpen, setIsOTPPopupOpen] = useState(false);
+  const [otpSent, setOTPSent] = useState(false);
 
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
@@ -21,9 +22,6 @@ const Register = () => {
     setShowPassword(!showPassword);
   };
 
-  const toggleOtpPopup = () => {
-    setIsOTPPopupOpen(!isOTPPopupOpen);
-  };
 
   // Function to handle registration
   const handleregister = async () => {
@@ -33,7 +31,6 @@ const Register = () => {
     const pass2 = document.getElementById("confirm-password").value;
     const email = document.getElementById("email").value;
     const ph = document.getElementById("phone").value;
-    const role = document.getElementById("isAdmin").checked;
 
     // Validation checks
     if (name === "") {
@@ -79,8 +76,28 @@ const Register = () => {
       return false;
     }
     setIsOTPPopupOpen(true);
-    //send-otp call
+    sendOTP();
   };
+
+  const sendOTP = async () => {
+    const email = document.getElementById("email").value;
+    // Call the sendOTP API
+    try {
+      const response = await axios.post("http://localhost:5000/send-otp", {
+        email,
+      });
+      console.log(response.data)
+      if (response.data.success) {
+        setOTPSent(response.data.recived_otp);
+      } else {
+        toast.error(response.data.message || "Failed to send OTP.");
+      }
+    } catch (error) {
+      toast.error("Failed to send OTP.");
+      console.error("Error sending OTP:", error);
+    }
+  };
+
   const completeRegistration = async () => {
     const name = document.getElementById("name").value;
     const password = document.getElementById("password").value;
@@ -90,11 +107,11 @@ const Register = () => {
 
     try {
       const response = await axios.post("http://localhost:5000/register", {
-        name,
-        email,
-        mobile: phone,
-        password,
-        role,
+        'name': name,
+        'email': email,
+        'mobile': phone,
+        'password': password,
+        'role': role,
       });
       if (response.status === 200) {
         toast.success("Registration successful!");
@@ -107,23 +124,24 @@ const Register = () => {
     } catch (error) {
       toast.error(
         "Registration failed: " +
-          (error.response?.data?.message || "Unknown Error")
+        (error.response?.data?.message || "Unknown Error")
       );
       console.error("Registration error:", error);
     }
   };
+
   // Function to handle OTP submission
-  const handleOTPSubmit = async (otp) => {
+  const handleOTPSubmit = (otp) => {
     try {
-      const response = await axios.post("http://localhost:5000/submit-otp", {
-        otp,
-      });
-      if (response.data.success) {
+      console.log(otp, otpSent)
+
+      if (otp == otpSent) {
         completeRegistration(); // Proceed with registration if OTP is verified
         setIsOTPPopupOpen(false);
-      } else {
+      }
+      else {
         toast.error("OTP verification failed, please try again.");
-        // setIsOTPPopupOpen(true); // Reopen the popup for a retry
+        //setIsOTPPopupOpen(true); // Reopen the popup for a retry
       }
     } catch (error) {
       toast.error("Failed to submit OTP.");

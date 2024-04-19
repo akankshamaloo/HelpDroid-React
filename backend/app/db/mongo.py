@@ -30,8 +30,11 @@ def insert_data(email,password,mobile,name,role):
         hash = sha256.sha256(password+""+email)
         
         data = {'email': email, 'password': hash,'mobile':mobile, 'name': name, 'role':role}
-        collection.insert_one(data)
+        print(data)
+        id=collection.insert_one(data)
         print("Inserted")
+        print(id)
+        return id.inserted_id
     except Exception as e:
         print(f"Error:  (An error occurred)")
 

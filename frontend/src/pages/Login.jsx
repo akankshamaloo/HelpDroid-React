@@ -100,7 +100,7 @@ const Login = () => {
             if (role) {
               n("/admin");
             } else {
-              n("/employee");
+              n("/patient");
             }
           }, 4000); // Adjust the delay as needed
         }
