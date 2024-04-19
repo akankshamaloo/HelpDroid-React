@@ -1,66 +1,128 @@
-import React,{useState} from 'react';
-import { FaUser } from "react-icons/fa";
-import { RxHamburgerMenu,RxCross2 } from "react-icons/rx";
-import { Link, useNavigate } from 'react-router-dom';
-import { toast } from "react-toastify";
+import React, { useState } from "react";
+import {
+  BsCart3,
+  BsGrid1X2Fill,
+  BsFillArchiveFill,
+  BsFillGrid3X3GapFill,
+  BsPeopleFill,
+  BsListCheck,
+  BsMenuButtonWideFill,
+  BsFillGearFill,
+} from "react-icons/bs";
 
-const Sidebar = ({ham,setHam}) => {
-    const n = useNavigate();
-    const handleLogout = () => {
-        toast.success("Log out successfully");
-        sessionStorage.setItem("auth", "false");
-        sessionStorage.setItem("userName", "");
-        sessionStorage.setItem("password", "");
-        setTimeout(() => {
-          n("/");
-        }, 4000);
-      };
+import { ListItem, ListItemIcon, ListItemText } from "@mui/material";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import ManageSearchIcon from "@mui/icons-material/ManageSearch";
+function Sidebar({ openSidebarToggle, OpenSidebar }) {
+  const [role, setRole] = useState(sessionStorage.getItem("role"));
+  const [clickedSection, setClickedSection] = useState("");
+  const handleClickSection = (section) => {
+    setClickedSection(section);
+  };
+  //true doctor
+  //false patient
   return (
-    <div className={ham?`w-1/6 fixed flex flex-col p-3 bg-cyan-600 bg-opacity-35   h-lvh`:`hidden`}>
-      {ham?<RxCross2 className="absolute hover:cursor-pointer top-2 left-48 text-3xl" onClick={setHam}/>:<></>}
-        <div className=" justify-center relative mt-10 mb-4 rounded-full flex">
-        {JSON.parse(sessionStorage.getItem('data')).image!==null?<img src={JSON.parse(sessionStorage.getItem('data')).image} className="w-32 h-30 object-scale-down mt-2 rounded-full"/>:<FaUser className="ml-5 mt-5 w-14 h-14" />}
-          
+    <aside
+      id="sidebar"
+      className={openSidebarToggle ? "sidebar-responsive" : ""}
+    >
+      <div className="sidebar-title">
+        <div className="sidebar-brand">
+          <BsCart3 className="icon_header" /> SHOP
         </div>
-        <p className="text-center font-bold text-lg">Hii {JSON.parse(sessionStorage.getItem('data')).name}</p>
-        <p className="text-center font-bold text-lg">Employee ID : {JSON.parse(sessionStorage.getItem('data')).userid}</p>
-
-        <div className="mt-16 text-xl  flex flex-col gap-8  text-center w-full justify-center items-start">
-        {document.URL.split('/')[3]=='employee'?
-          <div className='w-full'>
-          <Link to='/employee'><p className='text-white text-left bg-cyan-600 px-3 py-3 w-full rounded-md font-bold'>Current Timesheet</p></Link>
-          </div>:
-          <Link  to= '/employee'  className="px-3 hover:font-semibold">Current Timesheet</Link>
-          }
-        {document.URL.split('/')[3]=='timesheetList'?
-          <div className='w-full'>
-          <Link to='/timesheetList'><p className='text-white text-left bg-cyan-600 px-3 py-3 w-full rounded-md font-bold'>Timesheet List</p></Link>
-          </div>:
-          <Link to='/timesheetList' className="px-3 hover:font-semibold ">Timesheet List</Link>
-          }
-        {document.URL.split('/')[3]=='scorecard'?
-          <div className='w-full'>
-          <Link to='/scorecard'><p className='text-white text-left bg-cyan-600 px-3 py-3 w-full rounded-md font-bold'>Score Card</p></Link>
-          </div>:
-          <Link to='/scorecard'  className="px-3 hover:font-semibold ">Score Card</Link>
-          }
-        {document.URL.split('/')[3]=='profile'?
-          <div className='w-full'>
-          <Link to='/profile'><p className='text-white text-left bg-cyan-600 px-3 py-3 w-full rounded-md font-bold'>Edit Profile</p></Link>
-          </div>:
-          <Link to='/profile'  className="px-3 hover:font-semibold">Edit Profile</Link>
-          }
-          
-          
-          <button
-            className="px-6 py-2   absolute bottom-2 rounded-md border font-medium bg-red-600 hover:bg-red-700 text-white   hover:cursor-pointer"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
-        </div>
+        <span className="icon close_icon" onClick={OpenSidebar}>
+          X
+        </span>
       </div>
-  )
+
+      <ul className="sidebar-list">
+        <li className="sidebar-list-item">
+          <a href="">
+            <BsGrid1X2Fill className="icon" /> Dashboard
+          </a>
+        </li>
+        <li className="sidebar-list-item">
+          <div onClick={() => handleClickSection("prescription")}>
+            <BsFillArchiveFill className="icon" /> {role ? "" : "Prescription"}
+          </div>
+          {clickedSection === "prescription" && (
+            <>
+              <ListItem button component="a" href="/uploadprescription">
+                <ListItemIcon>
+                  <CloudUploadIcon />
+                </ListItemIcon>
+                <ListItemText primary="Upload Prescription" />
+              </ListItem>
+              <ListItem button component="a" href="/managepresciption">
+                <ListItemIcon>
+                  <ManageSearchIcon />
+                </ListItemIcon>
+                <ListItemText primary="Manage Prescription" />
+              </ListItem>
+            </>
+          )}
+        </li>
+        <li className="sidebar-list-item">
+          <div onClick={() => handleClickSection("reminder")}>
+            <BsFillGrid3X3GapFill className="icon" /> Medication Reminder
+          </div>
+          {clickedSection === "reminder" && (
+            <>
+              <ListItem button component="a" href="/addreminder">
+                <ListItemIcon>
+                  <CloudUploadIcon />
+                </ListItemIcon>
+                <ListItemText primary="Add reminders" />
+              </ListItem>
+              <ListItem button component="a" href="/managereminder">
+                <ListItemIcon>
+                  <ManageSearchIcon />
+                </ListItemIcon>
+                <ListItemText primary="Manage Reminders" />
+              </ListItem>
+            </>
+          )}
+        </li>
+        <li className="sidebar-list-item">
+          <div onClick={() => handleClickSection("contacts")}>
+            <BsPeopleFill className="icon" /> Emergency Contacts
+          </div>
+
+          {clickedSection === "contacts" && (
+            <>
+              <ListItem button component="a" href="/addcontacts">
+                <ListItemIcon>
+                  <CloudUploadIcon />
+                </ListItemIcon>
+                <ListItemText primary="Add Emergency Contacts" />
+              </ListItem>
+              <ListItem button component="a" href="/managecontacts">
+                <ListItemIcon>
+                  <ManageSearchIcon />
+                </ListItemIcon>
+                <ListItemText primary="Manage Emergency Contacts" />
+              </ListItem>
+            </>
+          )}
+        </li>
+        <li className="sidebar-list-item">
+          <a href="/chatwithdoctor">
+            <BsListCheck className="icon" /> Chat with Doctor
+          </a>
+        </li>
+        <li className="sidebar-list-item">
+          <a href="/checkhealth">
+            <BsMenuButtonWideFill className="icon" /> Check you Health
+          </a>
+        </li>
+        <li className="sidebar-list-item">
+          <a href="">
+            <BsFillGearFill className="icon" /> Setting
+          </a>
+        </li>
+      </ul>
+    </aside>
+  );
 }
 
-export default Sidebar
+export default Sidebar;
