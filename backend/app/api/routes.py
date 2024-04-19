@@ -141,6 +141,7 @@ def setup_routes(app):
         days=data.get('days')
         time=data.get('time')
         medicine=data.get('medicine')
+        print(data)
         if not all([email,days,time,medicine]):
             return jsonify({'data': 'Missing required fields'}), 400
         try:
@@ -165,6 +166,7 @@ def setup_routes(app):
     
     @app.route('/remove-medication', methods=['POST'])
     def remove_medication():
+        print(request.json)
         email=request.json.get('email')
         medication=request.json.get('medication')
         if not all([email,medication]):
@@ -180,6 +182,7 @@ def setup_routes(app):
     
     @app.route('/edit-medication', methods=['POST'])
     def edit_medication():
+        print(request.json)
         email=request.json.get('email')
         medication=request.json.get('medication')
         days=request.json.get('days')

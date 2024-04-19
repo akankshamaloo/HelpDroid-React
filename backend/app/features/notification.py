@@ -8,16 +8,19 @@ def schedule_medication_notification(med_name, time_to_take, days):
     med_time = datetime.datetime.strptime(time_to_take, '%H:%M')
     med_time = now.replace(hour=med_time.hour, minute=med_time.minute, second=0, microsecond=0)
     delay = (med_time - now).total_seconds()
-    
+
     if delay > 0:
-        # Check if today is one of the specified days
-        today = now.strftime('%A').lower()
-        if today in days:
+        # Check if today is a day for medication
+        today = now.strftime('%a')  # Get current day in abbreviated format (e.g., 'Mon', 'Tue', etc.)
+        if today in days and days[today] == 1:
             # Schedule the notification
             Clock.schedule_once(lambda dt: send_notification_med(med_name), delay)
             print("Scheduling notification for", med_name, "on", today)
         else:
-            print("Today is not one of the specified days for", med_name)
+            print("Today is not a day for", med_name)
+    else:
+        print("Time has already passed for", med_name)
+
 
 def send_notification_med(med_name):
     notification.notify(title='Medication Reminder', message=f'Time to take your medication: {med_name}')

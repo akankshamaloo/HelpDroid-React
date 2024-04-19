@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
@@ -16,6 +16,8 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import Sidebar from "../components/Sidebar";
 import dayjs from "dayjs";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 // Styles for the DataGrid columns
 // const useStyles = makeStyles({
@@ -30,10 +32,12 @@ import dayjs from "dayjs";
 // });
 
 function MedicationSchedule() {
+
   const [rows, setRows] = useState([
     { id: 1, medicationName: "Aspirin", time: "08:00 AM" },
     { id: 2, medicationName: "Ibuprofen", time: "12:00 PM" },
   ]);
+
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   const [open, setOpen] = useState(false);
@@ -52,6 +56,21 @@ function MedicationSchedule() {
     Fri: 0,
     Sat: 0,
   });
+
+  useEffect(() => {
+    try {
+      const fetchData = async () => {
+        const response = await axios.post("http://localhost:5000/get-medication", {
+          'email': sessionStorage.getItem('user_email')
+        });
+        console.log(response.data);
+        if (response.data.success)
+          setRows(response.data);
+      };
+      fetchData();
+    } catch (err) { }
+  }, []);
+
   const handleDaySelect = (day) => {
     setSelectedDays({
       ...selectedDays,
@@ -95,17 +114,47 @@ function MedicationSchedule() {
     setOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     setRows(rows.filter((row) => row.id !== id));
+    try {
+      const response = await axios.post("http://localhost:5000/remove-medication", {
+        'email': sessionStorage.getItem('user_email'),
+        'medication': rows.filter((row) => row.id === id)[0].medicationName
+      });
+      console.log(response.data);
+      if (response.data.success) {
+        console.log("Medication removed successfully");
+        toast.success("Medication removed successfully");
+      } else {
+        console.log("Failed to remove medication");
+        toast.error("Failed to remove medication");
+      }
+    }
+    catch (err) { }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (formData.id) {
-      setRows(rows.map((row) => (row.id === formData.id ? formData : row)));
-    } else {
+      setRows(rows?.map((row) => (row.id === formData.id ? formData : row)));
+      try {
+        const response = await axios.post("http://localhost:5000/edit-medication", {
+          'email': sessionStorage.getItem('user_email'),
+          'medication': formData.medicationName,
+          'time': formData.time,
+          'days': formatDaysForApi()
+        });
+      } catch (err) { }
+    }
+    else {
       setRows([...rows, { ...formData, id: rows.length + 1 }]);
       try {
-      } catch (err) {}
+        const response = await axios.post("http://localhost:5000/upload-medication", {
+          'email': sessionStorage.getItem('user_email'),
+          'medication': formData.medicationName,
+          'time': formData.time,
+          'days': formatDaysForApi()
+        });
+      } catch (err) { }
     }
     handleClose();
   };
@@ -221,7 +270,7 @@ function MedicationSchedule() {
         </Button>
 
         <DataGrid
-          rows={rows.map((row) => ({
+          rows={rows?.map((row) => ({
             ...row,
             weekday: getWeekdayAbbreviation(row.time), // Add the weekday field to each row
           }))}
