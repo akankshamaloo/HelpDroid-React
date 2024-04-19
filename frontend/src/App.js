@@ -13,6 +13,7 @@ import Patient from "./pages/patient";
 import PrescriptionUploadPage from "./pages/uploadPrescription";
 import MedicationSchedule from "./pages/Medication";
 import DisplayImages from "./pages/viewprescription";
+import ContactSchedule from "./pages/contact";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           path="/uploadprescription"
           element={<PrescriptionUploadPage />}
         />
+        <Route path="/contact" element={<ContactSchedule />} />
         <Route path="/managemedication" element={<MedicationSchedule />} />
         <Route path="/managepresciption" element={<DisplayImages />} />
         <Route path="/userprofile" element={<User_profile />} />
