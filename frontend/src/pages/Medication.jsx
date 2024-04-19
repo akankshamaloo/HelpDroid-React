@@ -137,13 +137,35 @@ function MedicationSchedule() {
           Add Medication
         </Button>
 
-        <DataGrid rows={rows} columns={columns} pageSize={5} />
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          pageSize={5}
+          sx={{
+            "& .MuiDataGrid-columnHeaders": {
+              color: "white",
+            },
+            "& .MuiDataGrid-cell": {
+              color: "white",
+            },
+            "& .MuiTablePagination-root": {
+              color: "white",
+            },
+            ".MuiDataGrid-root .MuiDataGrid-cell": {
+              color: "white", // This specifically changes the text color of the cells
+            },
+          }}
+        />
 
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle>
             {formData.id ? "Edit Medication" : "Add Medication"}
           </DialogTitle>
-          <DialogContent>
+          <DialogContent
+            sx={{
+              width: 500, // Set your desired width here
+            }}
+          >
             <TextField
               autoFocus
               margin="dense"
@@ -168,7 +190,11 @@ function MedicationSchedule() {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      InputProps={{ style: { color: "white" } }}
+                      sx={{ width: "100%" }} // This will also make it full width
+                      InputProps={{
+                        ...params.InputProps,
+                        style: { color: "white" },
+                      }}
                     />
                   )}
                 />
