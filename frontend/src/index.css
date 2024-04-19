@@ -1,4 +1,4 @@
-/* @import 'tailwindcss/base';
+@import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
@@ -403,17 +403,36 @@ body {
 
 /* Header  */
 .header {
-  grid-area: header;
-  height: 60px;
   display: flex;
   align-items: center;
+  /* Center items vertically */
   justify-content: space-between;
-  padding: 0 30px 0 30px;
-  box-shadow: 0 6px 7px -3px rgba(0, 0, 0, 0.35);
+  /* Distributes space between and around content items */
+  padding: 0 20px;
+  /* Adds padding on the sides for some space */
+  width: 100%;
+  /* Ensures the header spans the full width */
 }
 
-.menu-icon {
-  display: none;
+.menu-icon,
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.header-left {
+  justify-content: flex-start;
+  /* Aligns the search icon to the start */
+}
+
+.header-right {
+  justify-content: flex-end;
+  /* Ensures icons in header-right are pushed to the right */
+  flex-grow: 1;
+  /* Allows this div to grow and take up any remaining space */
+  gap: 10px;
+  /* Creates space between icons */
 }
 /* End Header  */
 
@@ -428,21 +447,39 @@ body {
 }
 
 .sidebar-title {
-  display: flex;
+  padding: 15px 30px;
+  /* Adjusts padding for the entire title area */
   justify-content: space-between;
-  align-items: center;
-  padding: 15px 30px 0px 30px;
-  margin-bottom: 30px;
+  /* Ensures space between elements */
 }
 
+.sidebar-title .close_icon {
+  cursor: pointer;
+  /* Ensures the close icon is clickable */
+  font-size: 24px;
+  /* Adjusts the size of the close icon */
+  margin-left: auto;
+  /* Moves the close icon to the right */
+}
 .sidebar-title > span {
   display: none;
 }
 
 .sidebar-brand {
+  display: flex;
+  /* Establishes a flex container */
+  align-items: center;
+  /* Aligns children vertically in the center */
   margin-top: 15px;
   font-size: 20px;
   font-weight: 700;
+}
+
+.icon_header {
+  margin-right: 10px;
+  /* Adds space between the icon and the text */
+  font-size: 26px;
+  /* Adjust the font size of the icon */
 }
 
 .sidebar-list {
@@ -453,6 +490,23 @@ body {
 .sidebar-list-item {
   padding: 20px 20px 20px 20px;
   font-size: 18px;
+}
+.sidebar-list-item a,
+.sidebar-list-item div {
+  display: flex;
+  /* Establishes a flex container */
+  align-items: center;
+  /* Aligns children vertically in the center */
+  text-decoration: none;
+  /* Removes underline from links */
+  color: inherit;
+  /* Inherits text color from parent */
+}
+
+.icon,
+.icon_header {
+  margin-right: 8px;
+  /* Adds space between the icon and the text */
 }
 
 .sidebar-list-item:hover {

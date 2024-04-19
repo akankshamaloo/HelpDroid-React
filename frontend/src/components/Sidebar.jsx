@@ -13,6 +13,9 @@ import {
 import { ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
+
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+
 function Sidebar({ openSidebarToggle, OpenSidebar }) {
   const [role, setRole] = useState(sessionStorage.getItem("role"));
   const [clickedSection, setClickedSection] = useState("");
@@ -112,7 +115,7 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
         </li>
         <li className="sidebar-list-item">
           <a href="/checkhealth">
-            <BsMenuButtonWideFill className="icon" /> Check you Health
+            <LocalHospitalIcon className="icon" /> Check Your Health
           </a>
         </li>
         <li className="sidebar-list-item">
