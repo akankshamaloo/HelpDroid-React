@@ -50,7 +50,7 @@ function DisplayImages() {
 
   return (
     <div className="container">
-      <Sidebar OpenSidebar={true} />
+      <Sidebar OpenSidebar={true} style={{ height: '100vh' }} />
       <div className="gallery">
         {images?.data?.map((base64Image, index) => (
           <div key={index} className="image-card">

@@ -46,7 +46,7 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
         </li>
         <li className="sidebar-list-item">
           <div onClick={() => handleClickSection("prescription")}>
-            <BsFillArchiveFill className="icon" /> {role ? "" : "Prescription"}
+            <BsFillArchiveFill className="icon" /> Prescription
           </div>
           {clickedSection === "prescription" && (
             <>
