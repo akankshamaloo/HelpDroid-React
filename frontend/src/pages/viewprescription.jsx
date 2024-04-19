@@ -8,39 +8,31 @@ function DisplayImages() {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:5000/get-prescription-images?email=${encodeURIComponent(
-            email
-          )}`
+        const response = await axios.post(
+          'http://localhost:5000/get-prescription', {
+          'email': sessionStorage.getItem("user_email") // Assuming you have a way to set this
+        }
         );
-        setImages(response.data.images);
+        console.log(response.data);
+        setImages(response.data);
       } catch (error) {
         console.error("Failed to fetch images", error);
       }
     };
 
-    if (email) {
-      fetchImages();
-    }
-  }, [email]); // Fetch images when email changes
+
+    fetchImages();
+
+  }, []); // Fetch images when email changes
 
   return (
     <div>
-      <input
-        type="text"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Enter email"
-      />
+
       {/* <button onClick={fetchImages}>Load Images</button> */}
       <div>
-        {images.map((imagePath, index) => (
+        {images?.data?.map((base64Image, index) => (
           <div key={index}>
-            <img
-              src={`http://localhost:5000/${imagePath}`}
-              alt="Decrypted Prescription"
-              style={{ width: "200px", height: "auto" }}
-            />
+            <img src={`data:image/png;base64,${base64Image}`} alt="Decrypted Prescription" style={{ width: '200px', height: 'auto' }} />
           </div>
         ))}
       </div>
