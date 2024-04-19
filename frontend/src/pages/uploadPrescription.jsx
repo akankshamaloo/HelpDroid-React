@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Button, TextField, Typography, Paper, Box } from "@mui/material";
 import Sidebar from "../components/Sidebar";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
+import "react-toastify/dist/ReactToastify.css";
 
 function PrescriptionUploadPage() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -43,8 +44,9 @@ function PrescriptionUploadPage() {
     formData.append("email", sessionStorage.getItem("user_email"));
     try {
       console.log("formData", formData);
-      const response = await axios.post("http://localhost:5000/upload-prescription",
-        formData,
+      const response = await axios.post(
+        "http://localhost:5000/upload-prescription",
+        formData
       );
 
       console.log(response.status);
@@ -115,6 +117,7 @@ function PrescriptionUploadPage() {
           </Button>
         </Box>
       </Paper>
+      <ToastContainer />
     </Box>
   );
 }
