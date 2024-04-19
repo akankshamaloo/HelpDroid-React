@@ -2,22 +2,26 @@ from kivy.clock import Clock
 from plyer import notification
 import datetime
 
-def schedule_medication_notification(med_name, time_to_take):
+def schedule_medication_notification(med_name, time_to_take, days):
     # Calculate the time difference from now to the medication time
     now = datetime.datetime.now()
     med_time = datetime.datetime.strptime(time_to_take, '%H:%M')
     med_time = now.replace(hour=med_time.hour, minute=med_time.minute, second=0, microsecond=0)
     delay = (med_time - now).total_seconds()
-
+    
     if delay > 0:
-        # Schedule the notification
-        Clock.schedule_once(lambda dt: send_notification_med(med_name), delay)
-    print("scheduling")
-
+        # Check if today is one of the specified days
+        today = now.strftime('%A').lower()
+        if today in days:
+            # Schedule the notification
+            Clock.schedule_once(lambda dt: send_notification_med(med_name), delay)
+            print("Scheduling notification for", med_name, "on", today)
+        else:
+            print("Today is not one of the specified days for", med_name)
 
 def send_notification_med(med_name):
     notification.notify(title='Medication Reminder', message=f'Time to take your medication: {med_name}')
-    print("sending")
+    print("Sending notification for", med_name)
 
 def send_notification_apt(patient_name):
     notification.notify(title='Appointment Reminder', message=f'Time for your appointment with: {patient_name}')

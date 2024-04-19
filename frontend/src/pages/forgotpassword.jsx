@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Modal, Box, Typography, TextField, Button } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
 const modalStyle = {
   position: "absolute",
   top: "50%",
@@ -16,6 +17,7 @@ const modalStyle = {
 export const ForgotPasswordModal = ({ open, onClose }) => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [OTPSent, setOTPSent] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [step, setStep] = useState(1);
@@ -25,37 +27,92 @@ export const ForgotPasswordModal = ({ open, onClose }) => {
   const handleNewPasswordChange = (e) => setNewPassword(e.target.value);
   const handleConfirmPasswordChange = (e) => setConfirmPassword(e.target.value);
 
-  const handleSendOtp = () => {
-    // TODO: Implement sending OTP logic
+  const handleSendOtp = async () => {
+    //Implement sending OTP logic
     console.log("OTP sent to:", email);
+    try {
+      const response = await axios.post("http://localhost:5000/send-otp", {
+        email,
+      });
+      console.log(response.data)
+      if (response.data.success) {
+        setOTPSent(response.data.recived_otp);
+        toast.success("OTP sent to your email");
+      } else {
+        toast.error(response.data.message || "Failed to send OTP.");
+      }
+    } catch (error) {
+      toast.error("Failed to send OTP.");
+      console.error("Error sending OTP:", error);
+    }
     setStep(2);
   };
 
   const handleVerifyOtp = () => {
     // TODO: Implement verify OTP logic
-    console.log("OTP verified:", otp);
+    console.log("OTP verified:", otp, "==", OTPSent);
+    if (otp !== OTPSent) {
+      toast.error("Invalid OTP");
+      return;
+    }
     setStep(3);
   };
+
   const handleCancel = () => {
     setStep(1);
     onClose();
   };
 
-  const handleResendOtp = () => {
+  const handleResendOtp = async () => {
     // TODO: Implement resend OTP logic
     console.log("OTP resent to:", email);
+    try {
+      const response = await axios.post("http://localhost:5000/send-otp", {
+        email,
+      });
+      console.log(response.data)
+      if (response.data.success) {
+        setOTPSent(response.data.recived_otp);
+      } else {
+        toast.error(response.data.message || "Failed to send OTP.");
+      }
+    } catch (error) {
+      toast.error("Failed to send OTP.");
+      console.error("Error sending OTP:", error);
+    }
     toast.info("OTP resent");
   };
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     if (newPassword !== confirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
     // TODO: Implement reset password logic
     console.log("Password reset for:", email);
+    try {
+      const response = await axios.post("http://localhost:5000/forgot-password", {
+        'email': email,
+        'password': newPassword,
+      });
+      console.log(response)
+      if (!response.data.success) {
+        toast.error(response.data.message || "Failed to reset password.");
+      }
+      else {
+        toast.success("Password has been reset");
+      }
+    }
+    catch (error) {
+      toast.error("Failed to reset password.");
+    }
     onClose(); // Close the modal
-    toast.success("Password has been reset");
+    setStep(1);
+    setEmail("");
+    setOtp("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setOTPSent("");
   };
 
   return (
