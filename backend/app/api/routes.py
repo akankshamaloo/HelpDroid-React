@@ -2,8 +2,16 @@ from flask import request, jsonify
 from app.db.mongo import *
 from app.db.authentication import *
 from app.features.otp_generate import *
+from werkzeug.utils import secure_filename
+import os
 
 def setup_routes(app):
+    # Set the folder where uploaded files will be stored
+    app.config['UPLOAD_FOLDER'] = r'C:\Users\akank'
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Optional: Set a limit to the upload size
+
+    # Ensure the upload directory exists
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     @app.route('/register', methods=['POST'])
     def register():
@@ -92,25 +100,37 @@ def setup_routes(app):
         
     @app.route('/upload-prescription', methods=['POST'])
     def upload_prescription():
-        data = request.get_json()
-        email = data.get('email')
-        path = data.get('path')
-        if not all([email, path]):
+        email = request.form['email']  # Access email sent from the form
+        file = request.files['file']  # Access the file sent from the form
+        print(email, file)
+        
+        if not email or not file:
             return jsonify({'data': 'Missing required fields'}), 400
+        
+        if file and email:
+            filename = secure_filename(file.filename)
+            save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            print(save_path)
+            file.save(save_path)  # Save file to the uploads folder
+
         try:
             # Get the size of the file in kilobytes (KB)
-            file_size_kb = path.getsize(path) / 1024
+            file_size_kb = os.path.getsize(save_path) / 1024
+
             # Check if the file size is less than or equal to 300 KB
-            if file_size_kb <= 300:
-                # Call the encryption function
-                append_encrypted_image_to_prescription(path,email)  # Call the encryption function
-                print(f"File path: {path} (Size: {file_size_kb:.2f} KB)")
-                return jsonify({'data': 'Prescription uploaded successfully'}), 200
-            else:
-                # File is too large, notify the user
-                return jsonify({'data': 'Choose a file within 300 KB'}), 500
-            
+            if file_size_kb > 300:
+                os.remove(save_path)  # Clean up the temporary file
+                return jsonify({'data': 'Choose a file within 300 KB'}), 400
+
+            # If file size is acceptable, proceed with encryption and updating the database
+           
+            append_encrypted_image_to_prescription(save_path, email)
+
+            os.remove(save_path)  # Clean up the temporary file
+            return jsonify({'data': 'Prescription uploaded successfully'}), 200
+
         except Exception as e:
+            os.remove(save_path)  # Ensure to clean up the temporary file in case of an error
             return jsonify({'data': str(e)}), 500
     
 

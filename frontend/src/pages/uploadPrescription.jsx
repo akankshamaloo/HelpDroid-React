@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button, TextField, Typography, Paper, Box } from "@mui/material";
 import Sidebar from "../components/Sidebar";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 function PrescriptionUploadPage() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -39,14 +40,15 @@ function PrescriptionUploadPage() {
 
     const formData = new FormData();
     formData.append("file", selectedFile);
-
+    formData.append("email", sessionStorage.getItem("user_email"));
     try {
-      const response = await fetch("your-api-endpoint", {
-        method: "POST",
-        body: formData,
-      });
+      console.log("formData", formData);
+      const response = await axios.post("http://localhost:5000/upload-prescription",
+        formData,
+      );
 
-      if (response.ok) {
+      console.log(response.status);
+      if (response.status === 200) {
         toast.success("Prescription uploaded successfully!");
         setSelectedFile(null); // Clear the file input after successful upload
       } else {
