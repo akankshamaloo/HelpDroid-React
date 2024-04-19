@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   BsFillArchiveFill,
   BsFillGrid3X3GapFill,
@@ -43,21 +44,19 @@ function Home_Comp() {
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const endpoints = [
-          "api/prescriptions/count", // Replace with your actual endpoint
-          "api/reminders/count", // Replace with your actual endpoint
-          "api/doctors/count", // Replace with your actual endpoint
-          "api/alerts/count", // Replace with your actual endpoint
-        ];
-        const promises = endpoints.map((endpoint) =>
-          fetch(endpoint).then((res) => res.json())
+        const response = await axios.post(
+          "http://localhost:5000/user-statistics",
+          {
+            email: sessionStorage.getItem("user_email"),
+          }
         );
-        const results = await Promise.all(promises);
-
-        setPrescriptions(results[0].count);
-        setReminders(results[1].count);
-        setDoctors(results[2].count);
-        setAlerts(results[3].count);
+        console.log(response.data);
+        console.log(response.status);
+        if (response.status === 200) {
+          setPrescriptions(response.data.prescription_count);
+          setReminders(response.data.medicine_count);
+          setDoctors(response.data.chat_count);
+        }
       } catch (error) {
         console.error("Failed to fetch counts:", error);
       }

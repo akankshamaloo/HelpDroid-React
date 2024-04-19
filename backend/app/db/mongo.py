@@ -54,19 +54,19 @@ def find(query):
    return matching_documents
    
        
-def loginotpcheck(email_input):
-    query = {'email': email_input}
-    matching_documents = collection.find(query)
-    for document in matching_documents:
-        print("Login Successful")
-        role=(document['role'])
-        id=str(document['_id'])
-        if(role):
-            return "Doctor",id
-        else:
-            return "Patient",id
+# def loginotpcheck(email_input):
+#     query = {'email': email_input}
+#     matching_documents = collection.find(query)
+#     for document in matching_documents:
+#         print("Login Successful")
+#         role=(document['role'])
+#         id=str(document['_id'])
+#         if(role):
+#             return "Doctor",id
+#         else:
+#             return "Patient",id
 
-    return None,None
+#     return None,None
 
 
 def append_encrypted_image_to_prescription(path,email):
@@ -108,8 +108,134 @@ def fetch_and_decrypt_prescription_images(email):
     else:
         print(f"No document found with email {email}")
         return []
+    
+def insert_medication(email,days,med_time,med_name):
+    if not email:
+        print("No email found in session.")
+        return
 
- 
+    med_data = {"name": med_name, "time": med_time, "days": days}
+
+    try:
+        # Update the existing user document to add the contact
+        update_result = collection.update_one(
+            {"email": email},
+            {"$push": {"medication": med_data}},
+            upsert=False
+        )
+        
+        if update_result.modified_count > 0:
+            print("medication inserted successfully.")
+            schedule_medication_notification(med_name, med_time, days)
+            return True
+        else:
+            print("No update was made.")
+            return False
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+    
+
+def get_medications_details(email):
+    # Replace with your collection name
+    user_data = collection.find_one({"email": email})
+    if user_data and "medication" in user_data:
+        return user_data["medication"]
+    return []
+def delete_medication(email,med_name):
+    if not email:
+        print("No email found in session.")
+        return
+
+    if med_name is None :
+        return
+
+    med_data = {"name": med_name}
+
+    try:
+        # Update the existing user document to add the contact
+        update_result = collection.update_one(
+            {"email": email},
+            {"$pull": {"medication": med_data}},
+            upsert=False
+        )
+        
+        
+        if update_result.modified_count > 0:
+            print("medication deleted successfully.")
+            return True
+        else:
+            print("No update was made, possibly because the contact already exists.")
+            return False
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+    
+def update_medication(email, med_name, days, med_time):
+    if not email:
+        print("No email found in session.")
+        return
+
+    if not med_name:
+        print("No medication name provided.")
+        return
+
+    try:
+        # Update the existing user document to update the medication
+        update_result = collection.update_one(
+            {"email": email, "medication.name": med_name},
+            {"$set": {"medication.$.days": days, "medication.$.time": med_time}},
+            upsert=False
+        )
+
+        if update_result.modified_count > 0:
+            print("Medication updated successfully.")
+            # You may want to call a function here to update the medication schedule notification
+            return True
+        else:
+            print("No update was made. Possibly because the medication name was not found.")
+            return False
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+    
+
+def get_user_statistics(email):
+    # Initialize counters
+    prescription_count = 0
+    medicine_count = 0
+    unique_receiver_ids = set()
+
+    try:
+        # Retrieve the user document by email
+        user_document = collection.find_one({"email": email})
+
+        # Check if the document was found
+        if user_document:
+            # Count the number of prescriptions
+            if "prescription_images" in user_document:
+                prescription_count = len(user_document["prescription_images"])
+
+            # Count the number of medicines
+            if "medication" in user_document:
+                medicine_count = len(user_document["medication"])
+
+            # Count the number of unique receiver IDs for chats
+            if "messages" in user_document:
+                # Iterate over each message group
+                for message_group in user_document["messages"]:
+                    # Extract unique receiver IDs from the messages
+                    unique_receiver_ids.update([message_group["receiver_id"]])
+
+        # Return the counts
+        return prescription_count, medicine_count, len(unique_receiver_ids)
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return 0, 0, 0  # Return zeros in case of any error 
 
 def read_email_from_session():
     with open('session.json', 'r') as file:
@@ -290,71 +416,8 @@ def delete_appointment(p_name,apt_detail):
         print(f"Error: {e}")
         return False
 
-def insert_medication(email,days,med_time,med_name):
-    if not email:
-        print("No email found in session.")
-        return
 
-    med_data = {"name": med_name, "time": med_time, "days": days}
-
-    try:
-        # Update the existing user document to add the contact
-        update_result = collection.update_one(
-            {"email": email},
-            {"$push": {"medication": med_data}},
-            upsert=False
-        )
-        
-        if update_result.modified_count > 0:
-            print("medication inserted successfully.")
-            schedule_medication_notification(med_name, med_time, days)
-            return True
-        else:
-            print("No update was made.")
-            return False
-
-    except Exception as e:
-        print(f"Error: {e}")
-        return False
     
-
-def get_medications_details():
-    email = read_email_from_session()
-    # Replace with your collection name
-    user_data = collection.find_one({"email": email})
-    if user_data and "medication" in user_data:
-        return user_data["medication"]
-    return []
-def delete_medication(med_name,med_time):
-    email = read_email_from_session()
-    if not email:
-        print("No email found in session.")
-        return
-
-    if med_name is None or med_time is None:
-        return
-
-    med_data = {"name": med_name, "time": med_time}
-
-    try:
-        # Update the existing user document to add the contact
-        update_result = collection.update_one(
-            {"email": email},
-            {"$pull": {"medication": med_data}},
-            upsert=False
-        )
-        
-        
-        if update_result.modified_count > 0:
-            print("medication deleted successfully.")
-            return True
-        else:
-            print("No update was made, possibly because the contact already exists.")
-            return False
-
-    except Exception as e:
-        print(f"Error: {e}")
-        return False
 def send_notification():
     try:
         med_timings = get_medications_details()

@@ -71,19 +71,6 @@ def setup_routes(app):
             return jsonify({'success': True, 'message': 'OTP sent successfully','recived_otp': otp}), 200
         except Exception as e:
             return jsonify({'success': False, 'message': str(e)}), 500
-
-    @app.route('/submit-otp', methods=['POST'])
-    def submit_otp():
-        otp = request.json.get('otp')
-        expected_otp = request.json.get('expected_otp')  # Assuming the expected OTP is sent in the request
-        
-        if not otp or not expected_otp:
-            return jsonify({'success': False, 'message': 'OTP is required'}), 400
-        
-        if otp == expected_otp:
-            return jsonify({'success': True, 'message': 'OTP verified successfully'}), 200
-        else:
-            return jsonify({'success': False, 'message': 'Invalid OTP'}), 401
         
     @app.route('/forgot-password', methods=['POST'])
     def forgot_password():
@@ -171,9 +158,51 @@ def setup_routes(app):
         if not email:
             return jsonify({'data': 'Missing required fields'}), 400
         try:
-            data=get_medication(email)
+            data=get_medications_details(email)
             return jsonify({'data': data}), 200
         except Exception as e:
             return jsonify({'data': str(e)}), 500
-            
     
+    @app.route('/remove-medication', methods=['POST'])
+    def remove_medication():
+        email=request.json.get('email')
+        medication=request.json.get('medication')
+        if not all([email,medication]):
+            return jsonify({'data': 'Missing required fields'}), 400
+        try:
+            success=delete_medication(email,medication)
+            if success:
+                return jsonify({'data': 'Medication deleted successfully'}), 200
+            else:
+                return jsonify({'data': 'Medication delete failed'}), 401
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+    
+    @app.route('/edit-medication', methods=['POST'])
+    def edit_medication():
+        email=request.json.get('email')
+        medication=request.json.get('medication')
+        days=request.json.get('days')
+        time=request.json.get('time')
+        if not all([email,medication,days,time]):
+            return jsonify({'data': 'Missing required fields'}), 400
+        try:
+            success=update_medication(email,medication,days,time)
+            if success:
+                return jsonify({'data': 'Medication updated successfully'}), 200
+            else:
+                return jsonify({'data': 'Medication update failed'}), 401
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+        
+    @app.route('/user-statistics', methods=['POST'])
+    def user_statistics():
+        email = request.json.get('email')
+        if not email:
+            return jsonify({'data': 'Missing required fields'}), 400
+
+        try:
+            prescription_count, medicine_count, chat_count = get_user_statistics(email)
+            return jsonify({'prescription_count': prescription_count, 'medicine_count': medicine_count, 'chat_count': chat_count}), 200
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
