@@ -26,9 +26,28 @@ function DisplayImages() {
     fetchImages();
   }, []);
 
-  const handleDelete = (index) => {
-    // Handle delete logic here
-    console.log("Delete image at index:", index);
+  const handleDelete = async (index) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/delete-prescription",
+        {
+          email: sessionStorage.getItem("user_email"),
+          index: index, // Send the index of the image to be deleted
+        }
+      );
+      if (response.status === 200) {
+        // If deletion successful, update the images state
+        setImages((prevImages) => {
+          const updatedImages = [...prevImages]; // Make a copy of prevImages
+          updatedImages.splice(index, 1); // Remove the deleted image from the array
+          return updatedImages;
+        });
+      } else {
+        console.error("Failed to delete image");
+      }
+    } catch (error) {
+      console.error("Failed to delete image", error);
+    }
   };
 
   const handleDownload = (base64Image) => {
