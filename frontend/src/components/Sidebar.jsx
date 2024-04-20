@@ -71,29 +71,12 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
           </a>
         </li>
         <li className="sidebar-list-item">
-          <div onClick={() => handleClickSection("contacts")}>
+          <a href="/contact">
             <BsPeopleFill className="icon" /> Emergency Contacts
-          </div>
-
-          {clickedSection === "contacts" && (
-            <>
-              <ListItem button component="a" href="/addcontacts">
-                <ListItemIcon>
-                  <CloudUploadIcon />
-                </ListItemIcon>
-                <ListItemText primary="Add Emergency Contacts" />
-              </ListItem>
-              <ListItem button component="a" href="/managecontacts">
-                <ListItemIcon>
-                  <ManageSearchIcon />
-                </ListItemIcon>
-                <ListItemText primary="Manage Emergency Contacts" />
-              </ListItem>
-            </>
-          )}
+          </a>
         </li>
         <li className="sidebar-list-item">
-          <a href="/chatwithdoctor">
+          <a href="/doctorlist">
             <BsListCheck className="icon" /> Chat with Doctor
           </a>
         </li>
