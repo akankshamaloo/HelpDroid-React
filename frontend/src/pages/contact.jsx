@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import {
   Box,
@@ -19,6 +19,8 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 import Sidebar from "../components/Sidebar";
+import axios from "axios";
+import { v4 as uuidv4 } from 'uuid';
 
 function ContactSchedule() {
   const [contacts, setContacts] = useState([
@@ -43,8 +45,39 @@ function ContactSchedule() {
   };
 
   const validatePhone = (phone) => {
-    return /^\d{3}-\d{3}-\d{4}$/.test(phone);
+    return /^\d{3}\d{3}\d{4}$/.test(phone);
   };
+
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.post("http://localhost:5000/get-contacts", {
+          'email': sessionStorage.getItem('user_email')
+        });
+        console.log(response);
+
+        if (response.status === 200) {
+          // Add unique IDs to each contact
+          const contactsWithIds = response.data.data.map(contact => ({
+            ...contact,
+            id: uuidv4()
+          }));
+          setContacts(contactsWithIds);
+        } else {
+          toast.error(response.data.message || "Failed to fetch contacts.");
+        }
+
+      } catch (err) {
+        // Handle error
+      }
+    };
+    fetchData();
+  }, []);
+
+
+
 
   const handleClickOpen = (contact) => {
     setContactData(contact);
@@ -60,29 +93,78 @@ function ContactSchedule() {
     setOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     setContacts(contacts.filter((contact) => contact.id !== id));
+    try {
+      console.log(contactData.name)
+      const response = await axios.post("http://localhost:5000/remove-contacts", {
+        'email': sessionStorage.getItem('user_email'),
+        'name': contactData.name,
+      });
+      console.log(response.data)
+      if (response.status === 200) {
+        toast.success("Contact deleted successfully");
+      }
+      else {
+        toast.error(response.data.message || "Failed to delete contact.");
+      }
+    }
+    catch (err) { }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateEmail(contactData.email)) {
       toast.error("Please enter a valid email address.");
       return;
     }
 
     if (!validatePhone(contactData.mobile)) {
-      toast.error("Please enter a valid phone number (format: 123-456-7890).");
+      toast.error("Please enter a valid phone number (format: 1234567890).");
       return;
     }
 
     if (contactData.id) {
       setContacts(
-        contacts.map((contact) =>
+        contacts?.map((contact) =>
           contact.id === contactData.id ? contactData : contact
         )
       );
-    } else {
-      setContacts([...contacts, { ...contactData, id: contacts.length + 1 }]);
+      console.log(contactData)
+      try {
+        const response = await axios.post("http://localhost:5000/edit-contacts", {
+          'email': sessionStorage.getItem('user_email'),
+          'email1': contactData.email,
+          'name': contactData.name,
+          'mobile': contactData.mobile,
+        });
+        console.log(response.data)
+        if (response.status === 200) {
+          toast.success("Contact updated successfully");
+        }
+        else {
+          toast.error(response.data.message || "Failed to update contact.");
+        }
+      } catch (err) { }
+    }
+    else {
+      setContacts([...contacts, { ...contactData, id: contacts ? contacts.length + 1 : 1 }]);
+      console.log(contactData)
+      try {
+        const response = await axios.post("http://localhost:5000/upload-contacts", {
+          'email': sessionStorage.getItem('user_email'),
+          'email1': contactData.email,
+          'name': contactData.name,
+          'mobile': contactData.mobile,
+        });
+        console.log(response.data)
+        if (response.status === 200) {
+          toast.success("Contact added successfully");
+        }
+        else {
+          toast.error(response.data.message || "Failed to add contact.");
+        }
+      } catch (err) { }
+
     }
     handleClose();
   };
@@ -139,7 +221,7 @@ function ContactSchedule() {
         </Button>
         <DataGrid
           rows={contacts}
-          columns={columns.map((column) => ({
+          columns={columns?.map((column) => ({
             ...column,
             headerAlign: "center", // This aligns the header text to the center
           }))}

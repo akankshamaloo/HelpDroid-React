@@ -8,6 +8,8 @@ from app.features.notification import *
 from datetime import datetime
 from bson.objectid import ObjectId
 import base64
+from pymongo import ReturnDocument
+
 
 # Replace with your MongoDB connection string
 mongo_uri = 'mongodb+srv://sonadas8april:riyadasdas@cluster0.x0jnn5h.mongodb.net/'
@@ -166,7 +168,7 @@ def delete_medication(email,med_name):
             print("medication deleted successfully.")
             return True
         else:
-            print("No update was made, possibly because the contact already exists.")
+            print("delete was not made, possibly because the medication does not exist.")
             return False
 
     except Exception as e:
@@ -252,18 +254,19 @@ def read_role_from_session():
         session_data = json.load(file)
         return session_data.get('role', None)
 
-def insert_contact(name='user', email1=None, mobile=None):
-    email = read_email_from_session()
+def insert_contact(email,email1=None, name='user', mobile=None):
+    
     if not email:
         print("No email found in session.")
         return
-
+    
     if email1 is None:
         return
     if mobile is None:
         return
+    
     contact_data = {"name": name, "email": email1, "mobile": mobile}
-
+    print(contact_data)
     try:
         print(contact_data)
         # Update the existing user document to add the contact
@@ -285,8 +288,7 @@ def insert_contact(name='user', email1=None, mobile=None):
         print(f"Error: {e}")
         return False
 
-def fetch_contacts():
-    email = read_email_from_session()
+def fetch_contacts(email):
     if not email:
         print("No email found in session.")
         return
@@ -298,6 +300,7 @@ def fetch_contacts():
         # Check if the document was found
         if user_document:
             contacts = user_document.get("contacts", [])
+            print(contacts)
             return contacts
         else:
             print(f"No document found with email {email}")
@@ -306,6 +309,78 @@ def fetch_contacts():
     except Exception as e:
         print(f"Error: {e}")
         return []
+
+def delete_contact(email, name):
+    if not email:
+        print("No email found in session.")
+        return
+
+    if name is None:
+        print("Name must be provided.")
+        return
+
+    contact_data = {"name": name}
+
+    try:
+        # Print debug information
+        print("Deleting contact with email:", email)
+        print("Contact data:", contact_data)
+
+        # Perform deletion operation
+        result = collection.find_one_and_update(
+            {"email": email},
+            {"$pull": {"contacts": contact_data}},
+            return_document=ReturnDocument.AFTER
+        )
+        
+        if result:
+            print("Contact deleted successfully.")
+            return True
+        else:
+            print("No update was made, possibly because the contact does not exist.")
+            return False
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+    
+def update_contact(email, new_email, name, new_mobile):
+    if not email:
+        print("No email found in session.")
+        return False
+
+    if new_email is None or new_mobile is None:
+        print("Both new_email and new_mobile must be provided.")
+        return False
+
+    contact_data = {"contacts.$.email": new_email, "contacts.$.mobile": new_mobile}
+
+    try:
+        # Print debug information
+        print("Updating contact with email:", email)
+        print("New email:", new_email)
+        print("New name:", name)
+        print("New mobile:", new_mobile)
+
+        # Update the existing user document to update the contact
+        result = collection.find_one_and_update(
+            {"email": email, "contacts.name": name},
+            {"$set": contact_data},
+            return_document=ReturnDocument.AFTER
+        )
+        
+        if result:
+            print("Contact updated successfully.")
+            return True
+        else:
+            print("No update was made, possibly because the contact does not exist.")
+            return False
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+
+    
 def user_details():
     email = read_email_from_session()
     if not email:

@@ -209,3 +209,71 @@ def setup_routes(app):
             return jsonify({'prescription_count': prescription_count, 'medicine_count': medicine_count, 'chat_count': chat_count}), 200
         except Exception as e:
             return jsonify({'data': str(e)}), 500
+        
+    @app.route('/upload-contacts', methods=['POST'])
+    def upload_contacts():
+        data=request.get_json()
+        email=data.get('email')
+        email1=data.get('email1')
+        pname=data.get('name')
+        mobile=data.get('mobile')
+        print(data)
+        if not all([email,email1,pname,mobile]):
+            return jsonify({'data': 'Missing required fields'}), 400
+        try:
+            success=insert_contact(email,email1,pname,mobile)
+            if success:
+                return jsonify({'data': 'Contact uploaded successfully'}), 200
+            else:
+                return jsonify({'data': 'Contact upload failed'}), 401
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+    
+    @app.route('/get-contacts', methods=['POST'])
+    def get_contacts():
+        email=request.json.get('email')
+        if not email:
+            return jsonify({'data': 'Missing required fields'}), 400
+        try:
+            data=fetch_contacts(email)
+            print(data)
+            return jsonify({'data': data}), 200
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+
+    @app.route('/edit-contacts', methods=['POST'])
+    def edit_contacts():
+        data=request.get_json()
+        email=data.get('email')
+        email1=data.get('email1')
+        pname=data.get('name')
+        mobile=data.get('mobile')
+        print(data)
+        if not all([email,email1,pname,mobile]):
+            return jsonify({'data': 'Missing required fields'}), 400
+        try:
+            success=update_contact(email,email1,pname,mobile)
+            if success:
+                return jsonify({'data': 'Contact updated successfully'}), 200
+            else:
+                return jsonify({'data': 'Contact update failed'}), 401
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+        
+    @app.route('/remove-contacts', methods=['POST'])
+    def remove_contacts():
+        data=request.get_json()
+        email=data.get('email')
+        pname=data.get('name')
+        print(data)
+
+        if not all([email,pname]):
+            return jsonify({'data': 'Missing required fields'}), 400
+        try:
+            success=delete_contact(email,pname)
+            if success:
+                return jsonify({'data': 'Contact deleted successfully'}), 200
+            else:
+                return jsonify({'data': 'Contact delete failed'}), 401
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
