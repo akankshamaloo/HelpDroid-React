@@ -36,7 +36,6 @@ function Home_Comp() {
   const [prescriptions, setPrescriptions] = useState(0);
   const [reminders, setReminders] = useState(0);
   const [doctors, setDoctors] = useState(0);
-  const [alerts, setAlerts] = useState(0);
   const [temperature, setTemperature] = useState(0);
   const [pulse, setPulse] = useState(0);
   const [oxygenLevel, setOxygenLevel] = useState(0);
@@ -115,13 +114,7 @@ function Home_Comp() {
           </div>
           <h1>{doctors}</h1>
         </div>
-        <div className="card">
-          <div className="card-inner">
-            <h3>ALERTS</h3>
-            <BsFillBellFill className="card_icon" />
-          </div>
-          <h1>{alerts}</h1>
-        </div>
+
       </div>
 
       <div className="charts">

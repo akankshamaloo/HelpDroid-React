@@ -15,6 +15,8 @@ import MedicationSchedule from "./pages/Medication";
 import DisplayImages from "./pages/viewprescription";
 import ContactSchedule from "./pages/contact";
 import DoctorList from "./pages/doctorlist";
+import Doctor from "./pages/doctor";
+import AppointmentSchedule from "./pages/appointments";
 
 function App() {
   return (
@@ -38,6 +40,9 @@ function App() {
         <Route path="/managepresciption" element={<DisplayImages />} />
         <Route path="/userprofile" element={<User_profile />} />
         <Route path="/doctorlist" element={<DoctorList />} />
+        <Route path="/doctor" element={<Doctor />} />
+        <Route path="/manageappoint" element={<AppointmentSchedule />} />
+
       </Routes>
     </Router>
   );

@@ -355,13 +355,11 @@ body {
 
 
 
- */
-
-
-.blur {
+*/ .blur {
   filter: blur(5px);
   /* Adjust the blur radius as needed */
 }
+
 body {
   margin: 0;
   padding: 0;
@@ -375,12 +373,15 @@ body {
   line-height: 1px;
   font-size: 20px;
 }
+
 .icon_header {
   vertical-align: middle;
   line-height: 1px;
   font-size: 26px;
 }
-.icon, .icon_header {
+
+.icon,
+.icon_header {
   margin-right: 5px;
 }
 
@@ -435,6 +436,7 @@ body {
   gap: 10px;
   /* Creates space between icons */
 }
+
 /* End Header  */
 
 /* Sidebar  */
@@ -462,7 +464,8 @@ body {
   margin-left: auto;
   /* Moves the close icon to the right */
 }
-.sidebar-title > span {
+
+.sidebar-title>span {
   display: none;
 }
 
@@ -492,6 +495,7 @@ body {
   padding: 20px 20px 20px 20px;
   font-size: 18px;
 }
+
 .sidebar-list-item a,
 .sidebar-list-item div {
   display: flex;
@@ -515,7 +519,7 @@ body {
   cursor: pointer;
 }
 
-.sidebar-list-item > a {
+.sidebar-list-item>a {
   text-decoration: none;
   color: #9e9ea4;
 }
@@ -531,10 +535,46 @@ body {
   z-index: 12 !important;
 }
 
+.center-aligned {
+  display: flex;
+  justify-content: center;
+}
+
+.emergency-button {
+  background-color: red;
+  /* Change the background color to red for an emergency feel */
+  border: none;
+  border-radius: 50%;
+  /* Make it circular */
+  padding: 30px;
+  /* Adjust padding to make it big */
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 150px;
+  /* Adjust button width */
+  height: 150px;
+}
+
+.emergency-button:hover {
+  background-color: rgb(2, 18, 95);
+  /* Darken the color on hover */
+}
+
+.heart-icon {
+  color: white;
+  /* Set icon color to white */
+  font-size: 100px;
+  /* Adjust heart icon size */
+
+}
+
+
 /* End Sidebar  */
 
 
-/* Main  */  
+/* Main  */
 .main-container {
   grid-area: main;
   overflow-y: auto;
@@ -549,7 +589,14 @@ body {
 
 .main-cards {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  margin: 15px 0;
+}
+
+.main-cards-doctor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 20px;
   margin: 15px 0;
 }
@@ -584,13 +631,13 @@ body {
   justify-content: space-between;
 }
 
-.card-inner > .card_icon {
+.card-inner>.card_icon {
   font-size: 25px;
 }
 
 .charts {
   display: grid;
-  grid-template-columns: 1fr 0.5fr; 
+  grid-template-columns: 1fr 0.5fr;
   gap: 20px;
   margin-top: 60px;
   width: 100%;
@@ -601,7 +648,7 @@ body {
 
 
 /* Medium <= 992px */
-  
+
 @media screen and (max-width: 992px) {
   .grid-container {
     grid-template-columns: 1fr;
@@ -619,12 +666,13 @@ body {
     display: inline;
   }
 
-  .sidebar-title > span {
+  .sidebar-title>span {
     display: inline;
   }
 }
+
 /* Small <= 768px */
-  
+
 @media screen and (max-width: 768px) {
   .main-cards {
     grid-template-columns: 1fr;
@@ -645,6 +693,7 @@ body {
     display: none;
   }
 }
+
 /* prescription view */
 .container {
   display: flex;

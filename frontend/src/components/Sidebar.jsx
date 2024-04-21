@@ -8,13 +8,14 @@ import {
   BsListCheck,
   BsMenuButtonWideFill,
   BsFillGearFill,
+  BsFillHeartPulseFill
 } from "react-icons/bs";
-
 import { ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
-
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 function Sidebar({ openSidebarToggle, OpenSidebar }) {
   const [role, setRole] = useState(sessionStorage.getItem("role"));
@@ -22,16 +23,35 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
   const handleClickSection = (section) => {
     setClickedSection(section);
   };
+  const handleEmergency = async () => {
+    console.log("Emergency");
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/emergency",
+        {
+          email: sessionStorage.getItem("user_email"),
+        }
+      );
+      console.log(response.data);
+      if (response.status === 200) {
+        console.log("success");
+        toast.success("EMERGENCY!! your loved ones have been notified");
+      } else {
+        toast.error("Error in notifying your loved ones. Please try again.");
+      }
+    } catch (err) { }
+  }
   //true doctor
   //false patient
   return (
+
     <aside
       id="sidebar"
       className={openSidebarToggle ? "sidebar-responsive" : ""}
     >
       <div className="sidebar-title">
         <div className="sidebar-brand">
-          <BsCart3 className="icon_header" /> SHOP
+          <LocalHospitalIcon className="icon_header" /> HelpDroid
         </div>
         <span className="icon close_icon" onClick={OpenSidebar}>
           X
@@ -89,6 +109,11 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
           <a href="">
             <BsFillGearFill className="icon" /> Setting
           </a>
+        </li>
+        <li className="sidebar-list-item center-aligned">
+          <button className="emergency-button" onClick={handleEmergency}>
+            <BsFillHeartPulseFill className="icon heart-icon" />
+          </button>
         </li>
       </ul>
     </aside>

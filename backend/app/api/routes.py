@@ -4,6 +4,8 @@ from app.db.authentication import *
 from app.features.otp_generate import *
 from werkzeug.utils import secure_filename
 import os
+from app.features.location import *
+from app.features.sms import *
 
 def setup_routes(app):
     # Set the folder where uploaded files will be stored
@@ -295,3 +297,28 @@ def setup_routes(app):
                 return jsonify({'data': 'Contact delete failed'}), 401
         except Exception as e:
             return jsonify({'data': str(e)}), 500
+        
+    @app.route('/emergency', methods=['POST'])
+    def emergency():
+        data=request.get_json()
+        email=data.get('email')
+        if not email:
+            return jsonify({'data': 'Missing required fields'}), 400
+        
+        try:     
+            details= user_details(email)
+            for contact in details.get("contacts", []):
+                response=get_location('223.191.62.144')
+                message="Your closed one have severe health issues please check .\nUser Details:\n Name:"+(details.get("name"))+"\n Mobile "+(details.get("mobile"))+"\n Email:"+(details.get("email"))+ "\nLocation: "+"\nCountry: "+response.get("country_name")+"\nState: "+response.get("region")+"\nCity: "+response.get("city")+"\nLatitude: "+str(response.get("latitude"))+"\nLongitude: "+str(response.get("longitude"))    
+                if contact.get("email"):
+                    print(contact.get("email"))
+                    #print(message)
+                    send_mail(contact.get("email"),message,"Emergency from HelpDroid")
+                    
+                if contact.get("mobile"):
+                    print(contact.get("mobile"))
+                    send_sms(contact.get("mobile"),message)
+            return jsonify({'data': 'Emergency Mail sent successfully'}), 200
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+        

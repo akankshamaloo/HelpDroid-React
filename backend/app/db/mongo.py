@@ -405,8 +405,8 @@ def update_contact(email, new_email, name, new_mobile):
         return False
 
     
-def user_details():
-    email = read_email_from_session()
+def user_details(email):
+    
     if not email:
         print("No email found in session.")
         return
