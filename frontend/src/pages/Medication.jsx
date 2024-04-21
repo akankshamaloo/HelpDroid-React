@@ -18,7 +18,8 @@ import Sidebar from "../components/Sidebar";
 import dayjs from "dayjs";
 import axios from "axios";
 import { toast } from "react-toastify";
-
+import { v4 as uuidv4 } from "uuid";
+import { ToastContainer } from "react-toastify";
 // Styles for the DataGrid columns
 // const useStyles = makeStyles({
 //   root: {
@@ -35,13 +36,13 @@ function MedicationSchedule() {
   const [rows, setRows] = useState([
     {
       id: 1,
-      medicationName: "Aspirin",
+      name: "Aspirin",
       time: "08:00 AM",
       days: { Sun: 0, Mon: 1, Tue: 1, Wed: 0, Thu: 0, Fri: 0, Sat: 0 },
     },
     {
       id: 2,
-      medicationName: "Ibuprofen",
+      name: "Ibuprofen",
       time: "12:00 PM",
       days: { Sun: 0, Mon: 0, Tue: 1, Wed: 0, Thu: 1, Fri: 0, Sat: 0 },
     },
@@ -52,7 +53,7 @@ function MedicationSchedule() {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     id: null,
-    medicationName: "",
+    name: "",
     time: dayjs(), // Initialize with current time as a dayjs object
     days: { Sun: 0, Mon: 0, Tue: 1, Wed: 0, Thu: 0, Fri: 0, Sat: 0 },
   });
@@ -70,19 +71,30 @@ function MedicationSchedule() {
   };
 
   useEffect(() => {
-    try {
-      const fetchData = async () => {
-        const response = await axios.post(
-          "http://localhost:5000/get-medication",
-          {
-            email: sessionStorage.getItem("user_email"),
-          }
-        );
-        console.log(response.data);
-        if (response.data.success) setRows(response.data);
-      };
-      fetchData();
-    } catch (err) {}
+    const fetchData = async () => {
+      try {
+        const response = await axios.post("http://localhost:5000/get-medication", {
+          'email': sessionStorage.getItem('user_email')
+        });
+        console.log(response);
+
+        if (response.status === 200) {
+          // Add unique IDs to each contact
+          const rowsWithIds = response.data.data.map(row => ({
+            ...row,
+            id: uuidv4()
+          }));
+          setRows(rowsWithIds);
+          console.log(rowsWithIds);
+        } else {
+          toast.error(response.data.message || "Failed to fetch contacts.");
+        }
+
+      } catch (err) {
+        // Handle error
+      }
+    };
+    fetchData();
   }, []);
 
   const handleDaySelect = (day) => {
@@ -123,7 +135,7 @@ function MedicationSchedule() {
   const handleAdd = () => {
     setFormData({
       id: null,
-      medicationName: "",
+      name: "",
       time: dayjs(),
       days: { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 },
     }); // Reset using dayjs
@@ -137,25 +149,25 @@ function MedicationSchedule() {
         "http://localhost:5000/remove-medication",
         {
           email: sessionStorage.getItem("user_email"),
-          medication: rows.filter((row) => row.id === id)[0].medicationName,
+          medication: rows.filter((row) => row.id === id)[0].name,
         }
       );
       console.log(response.data);
-      if (response.data.success) {
+      if (response.status === 200) {
         console.log("Medication removed successfully");
         toast.success("Medication removed successfully");
       } else {
         console.log("Failed to remove medication");
         toast.error("Failed to remove medication");
       }
-    } catch (err) {}
+    } catch (err) { }
   };
 
   const handleSave = async () => {
     const formattedTime = formData.time.format();
     console.log({
       email: sessionStorage.getItem("user_email"),
-      medication: formData.medicationName,
+      medication: formData.name,
       time: formattedTime,
       days: formatDaysForApi(),
     });
@@ -170,28 +182,29 @@ function MedicationSchedule() {
           "http://localhost:5000/edit-medication",
           {
             email: sessionStorage.getItem("user_email"),
-            medication: formData.medicationName,
+            medication: formData.name,
             time: formattedTime,
             days: selectedDays,
           }
         );
-      } catch (err) {}
+      } catch (err) { }
     } else {
       setRows([
         ...rows,
         { ...formData, days: selectedDays, id: rows.length + 1 },
       ]);
+
       try {
         const response = await axios.post(
           "http://localhost:5000/upload-medication",
           {
-            email: sessionStorage.getItem("user_email"),
-            medication: formData.medicationName,
-            time: formattedTime,
-            days: selectedDays,
+            'email': sessionStorage.getItem("user_email"),
+            'medication': formData.name,
+            'time': formattedTime,
+            'days': selectedDays,
           }
         );
-      } catch (err) {}
+      } catch (err) { }
     }
 
     handleClose();
@@ -229,7 +242,7 @@ function MedicationSchedule() {
   };
   const columns = [
     {
-      field: "medicationName",
+      field: "name",
       headerName: "Medication Name",
       width: 200,
     },
@@ -339,11 +352,11 @@ function MedicationSchedule() {
             <TextField
               autoFocus
               margin="dense"
-              name="medicationName"
+              name="name"
               label="Medication Name"
               type="text"
               fullWidth
-              value={formData.medicationName}
+              value={formData.name}
               disabled={formData.id ? true : false}
               onChange={handleChange}
             />
@@ -402,6 +415,7 @@ function MedicationSchedule() {
             </Button>
           </DialogActions>
         </Dialog>
+        <ToastContainer />
       </Box>
     </Box>
   );

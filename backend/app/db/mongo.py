@@ -111,13 +111,30 @@ def fetch_and_decrypt_prescription_images(email):
         print(f"No document found with email {email}")
         return []
     
+def delete_prescription_image(email, index):
+    document = collection.find_one({"email": email})
+
+    if document:
+        encrypted_images = document.get("prescription_images", [])
+
+        if 0 <= index < len(encrypted_images):
+            del encrypted_images[index]
+            result = collection.update_one(
+                {"email": email},
+                {"$set": {"prescription_images": encrypted_images}}
+            )
+            if result.modified_count > 0:
+                print(f"Prescription image deleted for {email}")
+                return True
+    return False
+    
 def insert_medication(email,days,med_time,med_name):
     if not email:
         print("No email found in session.")
         return
 
     med_data = {"name": med_name, "time": med_time, "days": days}
-
+    print(med_data)
     try:
         # Update the existing user document to add the contact
         update_result = collection.update_one(
@@ -128,7 +145,10 @@ def insert_medication(email,days,med_time,med_name):
         
         if update_result.modified_count > 0:
             print("medication inserted successfully.")
-            schedule_medication_notification(med_name, med_time, days)
+            datetime_obj = datetime.fromisoformat(med_time)
+            time_formatted = datetime_obj.strftime('%H:%M')
+            print(time_formatted)
+            schedule_medication_notification(med_name, time_formatted, days)
             return True
         else:
             print("No update was made.")
@@ -194,6 +214,10 @@ def update_medication(email, med_name, days, med_time):
 
         if update_result.modified_count > 0:
             print("Medication updated successfully.")
+            datetime_obj = datetime.fromisoformat(med_time)
+            time_formatted = datetime_obj.strftime('%H:%M')
+            print(time_formatted)
+            schedule_medication_notification(med_name, time_formatted, days)
             # You may want to call a function here to update the medication schedule notification
             return True
         else:

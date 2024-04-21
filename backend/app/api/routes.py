@@ -133,6 +133,23 @@ def setup_routes(app):
             return jsonify({'data': data}), 200
         except Exception as e:
             return jsonify({'data': str(e)}), 500
+    
+    @app.route('/delete-prescription', methods=['POST'])
+    def delete_prescription():
+        email = request.json.get('email')
+        index = request.json.get('index')
+
+        if not email or index is None:
+            return jsonify({'data': 'Missing required fields'}), 400
+
+        try:
+            result = delete_prescription_image(email, index)
+            if result:
+                return jsonify({'data': 'Prescription image deleted successfully'}), 200
+            else:
+                return jsonify({'data': 'Failed to delete prescription image'}), 400
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
 
 
     @app.route('/upload-medication', methods=['POST'])
@@ -141,7 +158,7 @@ def setup_routes(app):
         email=data.get('email')
         days=data.get('days')
         time=data.get('time')
-        medicine=data.get('medicine')
+        medicine=data.get('medication')
         print(data)
         if not all([email,days,time,medicine]):
             return jsonify({'data': 'Missing required fields'}), 400
@@ -161,6 +178,7 @@ def setup_routes(app):
             return jsonify({'data': 'Missing required fields'}), 400
         try:
             data=get_medications_details(email)
+            print(data)
             return jsonify({'data': data}), 200
         except Exception as e:
             return jsonify({'data': str(e)}), 500
