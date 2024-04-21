@@ -102,6 +102,7 @@ const Login = () => {
           sessionStorage.setItem("user_id", user_id);
           sessionStorage.setItem("role", role);
           console.log(role, user_id);
+          send_notify(sessionStorage.getItem("user_email"));
           setTimeout(() => {
             if (role) {
               n("/doctor");
@@ -114,6 +115,20 @@ const Login = () => {
         toast.error("Invalid Credentials");
       }
     } catch (error) { }
+  };
+
+  const send_notify = async (email) => {
+    try {
+      const response = await axios.post("http://localhost:5000/notify", {
+        email: email,
+      });
+      console.log(response.data);
+      if (response.status === 200) {
+        console.log("Notification sent");
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   // JSX structure for the Login component

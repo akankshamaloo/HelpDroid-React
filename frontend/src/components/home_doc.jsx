@@ -32,7 +32,6 @@ import {
 } from "recharts";
 
 function Home_Doc() {
-    const [isEmergency, setEmergency] = useState(false);
     const [prescriptions, setPrescriptions] = useState(0);
     const [reminders, setReminders] = useState(0);
     const [doctors, setDoctors] = useState(0);
@@ -41,27 +40,26 @@ function Home_Doc() {
     const [oxygenLevel, setOxygenLevel] = useState(0);
 
     useEffect(() => {
-        // const fetchCounts = async () => {
-        //     try {
-        //         const response = await axios.post(
-        //             "http://localhost:5000/doc-statistics",
-        //             {
-        //                 email: sessionStorage.getItem("user_email"),
-        //             }
-        //         );
-        //         console.log(response.data);
-        //         console.log(response.status);
-        //         if (response.status === 200) {
-        //             setPrescriptions(response.data.prescription_count);
-        //             setReminders(response.data.medicine_count);
-        //             setDoctors(response.data.chat_count);
-        //         }
-        //     } catch (error) {
-        //         console.error("Failed to fetch counts:", error);
-        //     }
-        // };
+        const fetchCounts = async () => {
+            try {
+                const response = await axios.post(
+                    "http://localhost:5000/doc-statistics",
+                    {
+                        email: sessionStorage.getItem("user_email"),
+                    }
+                );
+                console.log(response.data);
+                console.log(response.status);
+                if (response.status === 200) {
+                    setReminders(response.data.appiontment_count);
+                    setDoctors(response.data.chat_count);
+                }
+            } catch (error) {
+                console.error("Failed to fetch counts:", error);
+            }
+        };
 
-        // fetchCounts();
+        fetchCounts();
     }, []); //
 
     const dummyData = [

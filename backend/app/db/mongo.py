@@ -264,20 +264,43 @@ def get_user_statistics(email):
         print(f"An error occurred: {e}")
         return 0, 0, 0  # Return zeros in case of any error 
 
-def read_email_from_session():
-    with open('session.json', 'r') as file:
-        session_data = json.load(file)
-        return session_data.get('user_email', None)
+def get_doc_statistics(email):
+    # Initialize counters
+    appointment_count = 0
+    unique_receiver_ids = set()
 
-def read_id_from_session():
-    with open('session.json', 'r') as file:
-        session_data = json.load(file)
-        return session_data.get('user_id', None)
-    
-def read_role_from_session():
-    with open('session.json', 'r') as file:
-        session_data = json.load(file)
-        return session_data.get('role', None)
+    try:
+        print("email",email)
+        # Retrieve the user document by email
+        user_document = collection.find_one({"email": email})
+
+        # Check if the document was found
+        if user_document:
+            # Count the number of appointments
+            current_date = datetime.now().strftime("%Y-%m-%d")
+
+            for appointment in user_document.get("appointment", []):
+                print(appointment)
+                if appointment.get("date", "").split("T")[0] == current_date:
+                    print("Appointment found for today.")
+                    appointment_count += 1
+            
+
+
+            # Count the number of unique receiver IDs for chats
+            if "messages" in user_document:
+                # Iterate over each message group
+                for message_group in user_document["messages"]:
+                    # Extract unique receiver IDs from the messages
+                    unique_receiver_ids.update([message_group["receiver_id"]])
+
+            # Return the counts
+        return appointment_count, len(unique_receiver_ids)
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return 0, 0 # Return zeros in case of any error 
+
 
 def insert_contact(email,email1=None, name='user', mobile=None):
     
@@ -580,6 +603,7 @@ def delete_appointment(email,p_name):
     
 def send_notification(email):
     try:
+        print("Sending notifications for", email)
         med_timings = get_medications_details(email)
         apt_timings = get_appointment_details(email)
         for med_timing in med_timings:

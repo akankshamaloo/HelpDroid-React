@@ -60,13 +60,14 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
       </div>
 
       <ul className="sidebar-list">
-        <li className="sidebar-list-item">
-          <a href="/patient">
-            <BsGrid1X2Fill className="icon" /> Dashboard
-          </a>
-        </li>
+
         {role == "false" ? (
           <>
+            <li className="sidebar-list-item">
+              <a href="/patient">
+                <BsGrid1X2Fill className="icon" /> Dashboard
+              </a>
+            </li>
             <li className="sidebar-list-item">
               <div onClick={() => handleClickSection("prescription")}>
                 <BsFillArchiveFill className="icon" /> Prescription
@@ -117,6 +118,11 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
           </>
         ) : (
           <>
+            <li className="sidebar-list-item">
+              <a href="/doctor">
+                <BsGrid1X2Fill className="icon" /> Dashboard
+              </a>
+            </li>
             <li className="sidebar-list-item">
               <a href="/manageappoint">
                 <BsFillGrid3X3GapFill className="icon" /> Appointment Reminder

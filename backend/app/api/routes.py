@@ -231,6 +231,20 @@ def setup_routes(app):
         except Exception as e:
             return jsonify({'data': str(e)}), 500
         
+    @app.route('/doc-statistics', methods=['POST'])
+    def doc_statistics():
+        email = request.json.get('email')
+        print(email)
+        if not email:
+            return jsonify({'data': 'Missing required fields'}), 400
+
+        try:
+            print("inside try")
+            appiontment_count, chat_count = get_doc_statistics(email)
+            return jsonify({'appiontment_count': appiontment_count, 'chat_count': chat_count}), 200
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+        
     @app.route('/upload-contacts', methods=['POST'])
     def upload_contacts():
         data=request.get_json()
@@ -415,6 +429,19 @@ def setup_routes(app):
                     print(contact.get("mobile"))
                     send_sms(contact.get("mobile"),message)
             return jsonify({'data': 'Emergency Mail sent successfully'}), 200
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+        
+    @app.route('/notify', methods=['POST'])
+    def notify():
+        data=request.get_json()
+        email=data.get('email')
+        if not email:
+            return jsonify({'data': 'Missing required fields'}), 400
+        
+        try:     
+            send_notification(email)
+            return jsonify({'data': 'Notification sent successfully'}), 200
         except Exception as e:
             return jsonify({'data': str(e)}), 500
         
