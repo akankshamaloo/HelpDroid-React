@@ -42,7 +42,6 @@ function App() {
         <Route path="/doctorlist" element={<DoctorList />} />
         <Route path="/doctor" element={<Doctor />} />
         <Route path="/manageappoint" element={<AppointmentSchedule />} />
-
       </Routes>
     </Router>
   );
