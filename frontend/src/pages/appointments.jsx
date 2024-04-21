@@ -34,31 +34,31 @@ function AppointmentSchedule() {
     });
 
     useEffect(() => {
-        // const fetchData = async () => {
-        //   try {
-        //     // Fetch appointments from the backend
-        //     const response = await axios.post("http://localhost:5000/get-appointments", {
-        //       'email': sessionStorage.getItem('user_email')
-        //     });
-        //     console.log(response);
+        const fetchData = async () => {
+            try {
+                // Fetch appointments from the backend
+                const response = await axios.post("http://localhost:5000/get-appointments", {
+                    'email': sessionStorage.getItem('user_email')
+                });
+                console.log(response);
 
-        //     if (response.status === 200) {
-        //       // Add unique IDs to each appointment
-        //       const appointmentsWithIds = response.data.data.map(appointment => ({
-        //         ...appointment,
-        //         id: uuidv4()
-        //       }));
-        //       setRows(appointmentsWithIds);
-        //       console.log(appointmentsWithIds);
-        //     } else {
-        //       toast.error(response.data.message || "Failed to fetch appointments.");
-        //     }
+                if (response.status === 200) {
+                    // Add unique IDs to each appointment
+                    const appointmentsWithIds = response.data.data.map(appointment => ({
+                        ...appointment,
+                        id: uuidv4()
+                    }));
+                    setRows(appointmentsWithIds);
+                    console.log(appointmentsWithIds);
+                } else {
+                    toast.error(response.data.message || "Failed to fetch appointments.");
+                }
 
-        //   } catch (err) {
-        //     // Handle error
-        //   }
-        // };
-        // fetchData();
+            } catch (err) {
+                // Handle error
+            }
+        };
+        fetchData();
     }, []);
 
     const handleChange = (event) => {
@@ -97,23 +97,23 @@ function AppointmentSchedule() {
 
     const handleDelete = async (id) => {
         setRows(rows.filter((row) => row.id !== id));
-        // try {
-        //   const response = await axios.post(
-        //     "http://localhost:5000/remove-appointment",
-        //     {
-        //       email: sessionStorage.getItem("user_email"),
-        //       appointment: rows.filter((row) => row.id === id)[0].name,
-        //     }
-        //   );
-        //   console.log(response.data);
-        //   if (response.status === 200) {
-        //     console.log("Appointment removed successfully");
-        //     toast.success("Appointment removed successfully");
-        //   } else {
-        //     console.log("Failed to remove appointment");
-        //     toast.error("Failed to remove appointment");
-        //   }
-        // } catch (err) { }
+        try {
+            const response = await axios.post(
+                "http://localhost:5000/remove-appointment",
+                {
+                    email: sessionStorage.getItem("user_email"),
+                    appointment: rows.filter((row) => row.id === id)[0].name,
+                }
+            );
+            console.log(response.data);
+            if (response.status === 200) {
+                console.log("Appointment removed successfully");
+                toast.success("Appointment removed successfully");
+            } else {
+                console.log("Failed to remove appointment");
+                toast.error("Failed to remove appointment");
+            }
+        } catch (err) { }
     };
 
     const handleSave = async () => {
@@ -131,34 +131,52 @@ function AppointmentSchedule() {
                     row.id === formData.id ? { ...formData } : row
                 )
             );
-            //   try {
-            //     const response = await axios.post(
-            //       "http://localhost:5000/edit-appointment",
-            //       {
-            //         email: sessionStorage.getItem("user_email"),
-            //         appointment: formData.name,
-            //         time: formattedTime,
-            //         date: formattedDate,
-            //       }
-            //     );
-            //   } catch (err) { }
+            try {
+                const response = await axios.post(
+                    "http://localhost:5000/edit-appointment",
+                    {
+                        email: sessionStorage.getItem("user_email"),
+                        appointment: formData.name,
+                        time: formattedTime,
+                        date: formattedDate,
+                    }
+                );
+                if (response.status === 200) {
+                    console.log("Appointment updated successfully");
+                    toast.success("Appointment updated successfully");
+                }
+                else {
+                    console.log("Failed to update appointment");
+                    toast.error("Failed to update appointment");
+                }
+
+            } catch (err) { }
         } else {
             setRows([
                 ...rows,
                 { ...formData, id: rows.length + 1 },
             ]);
 
-            //   try {
-            //     const response = await axios.post(
-            //       "http://localhost:5000/upload-appointment",
-            //       {
-            //         'email': sessionStorage.getItem("user_email"),
-            //         'appointment': formData.name,
-            //         'time': formattedTime,
-            //         'date': formattedDate,
-            //       }
-            //     );
-            //   } catch (err) { }
+            try {
+                const response = await axios.post(
+                    "http://localhost:5000/upload-appointment",
+                    {
+                        'email': sessionStorage.getItem("user_email"),
+                        'appointment': formData.name,
+                        'time': formattedTime,
+                        'date': formattedDate,
+                    }
+                );
+                if (response.status === 200) {
+                    console.log("Appointment added successfully");
+                    toast.success("Appointment added successfully");
+                }
+                else {
+                    console.log("Failed to add appointment");
+                    toast.error("Failed to add appointment");
+                }
+
+            } catch (err) { }
         }
 
         handleClose();

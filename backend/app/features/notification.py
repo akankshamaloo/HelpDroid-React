@@ -1,6 +1,6 @@
-from kivy.clock import Clock
 from plyer import notification
 import datetime
+import threading
 
 def schedule_medication_notification(med_name, time_to_take, days):
     # Calculate the time difference from now to the medication time
@@ -14,7 +14,8 @@ def schedule_medication_notification(med_name, time_to_take, days):
         today = now.strftime('%a')  # Get current day in abbreviated format (e.g., 'Mon', 'Tue', etc.)
         if today in days and days[today] == 1:
             # Schedule the notification
-            Clock.schedule_once(lambda dt: send_notification_med(med_name), delay)
+            timer = threading.Timer(delay, send_notification_med, args=[med_name])
+            timer.start()
             print("Scheduling notification for", med_name, "on", today,"at", med_time.strftime('%H:%M'))
         else:
             print("Today is not a day for", med_name)
@@ -30,29 +31,28 @@ def send_notification_apt(patient_name):
     notification.notify(title='Appointment Reminder', message=f'Time for your appointment with: {patient_name}')
     print(f"Notification sent to {patient_name}")
 
+def schedule_notification(p_name, delay):
+    timer = threading.Timer(delay, send_notification_apt, args=[p_name])
+    print(f"Scheduling notification for {p_name} in {delay} seconds")
+    timer.start()
+
 def schedule_appointment_notification(p_name, time_to_take, date):
-    # Parse the date provided to a datetime object
     appointment_date = datetime.datetime.strptime(date, '%Y-%m-%d')
     today_date = datetime.datetime.now().date()
-    print("scheduling")
-    # Check if the appointment date is today
+
     if appointment_date.date() == today_date:
-        print("hiiiii")
-        print(appointment_date.date(), today_date)
         now = datetime.datetime.now()
         med_time = datetime.datetime.strptime(time_to_take, '%H:%M')
         med_time = med_time.replace(year=now.year, month=now.month, day=now.day)
         
         delay = (med_time - now).total_seconds()
-        print(now, med_time, delay )
-        # Check if the time is within the next 5 minutes or has already passed
-        if 0 <= delay <= 5 * 60:
+
+        if 0 <= delay <= 1 * 60:
             send_notification_apt(p_name)
         elif delay > 0:
-            # Schedule the notification if more than 5 minutes away
-            Clock.schedule_once(lambda dt: send_notification_apt(p_name), delay)
+            schedule_notification(p_name, delay)
         else:
-            print("The time for appointment has already passed.")
+            print("The time for the appointment has already passed.")
     else:
         print("The specified date is not today.")
 

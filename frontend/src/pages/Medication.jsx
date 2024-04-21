@@ -187,6 +187,12 @@ function MedicationSchedule() {
             days: selectedDays,
           }
         );
+        if (response.status === 200) {
+          toast.success("Medication updated successfully");
+        }
+        else {
+          toast.error(response.data.message || "Failed to update medication");
+        }
       } catch (err) { }
     } else {
       setRows([
@@ -202,8 +208,14 @@ function MedicationSchedule() {
             'medication': formData.name,
             'time': formattedTime,
             'days': selectedDays,
-          }
-        );
+          });
+        if (response.status === 200) {
+          toast.success("Medication added successfully");
+        }
+        else {
+          toast.error(response.data.message || "Failed to add medication");
+        }
+
       } catch (err) { }
     }
 

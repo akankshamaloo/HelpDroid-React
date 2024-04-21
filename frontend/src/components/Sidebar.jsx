@@ -107,11 +107,17 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
                 <LocalHospitalIcon className="icon" /> Check Your Health
               </a>
             </li>
+            <li className="sidebar-list-item center-aligned">
+              {/* Emergency button */}
+              <button className="emergency-button" onClick={handleEmergency}>
+                <BsFillHeartPulseFill className="icon heart-icon" />
+              </button>
+            </li>
           </>
         ) : (
           <>
             <li className="sidebar-list-item">
-              <a href="/managemedication">
+              <a href="/manageappoint">
                 <BsFillGrid3X3GapFill className="icon" /> Appointment Reminder
               </a>
             </li>

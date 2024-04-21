@@ -5,10 +5,11 @@ import json
 import tempfile
 from app.crypto.triple_des import decrypted, encrypted
 from app.features.notification import *
-from datetime import datetime
+from datetime import datetime,timezone
 from bson.objectid import ObjectId
 import base64
 from pymongo import ReturnDocument
+
 
 
 # Replace with your MongoDB connection string
@@ -427,8 +428,8 @@ def user_details(email):
         return []
 
 
-def insert_appointment(p_name,a_time,a_date):
-    email = read_email_from_session()
+def insert_appointment(email,p_name,a_time,a_date):
+    
     if not email:
         print("No email found in session.")
         return
@@ -449,7 +450,14 @@ def insert_appointment(p_name,a_time,a_date):
         
         if update_result.modified_count > 0:
             print("appointment inserted successfully.")
-            schedule_appointment_notification(p_name, a_time, a_date)
+            time_obj = datetime.fromisoformat(a_time)
+            time_formatted = time_obj.strftime('%H:%M')
+            print(time_formatted)
+            date_obj = datetime.fromisoformat(a_date)
+            date_formatted = date_obj.strftime('%Y-%m-%d')
+            
+            print(time_formatted, date_formatted)
+            schedule_appointment_notification(p_name, time_formatted, date_formatted)
             return True
         else:
             print("No update was made, possibly because the contact already exists.")
@@ -458,45 +466,98 @@ def insert_appointment(p_name,a_time,a_date):
     except Exception as e:
         print(f"Error: {e}")
         return False
-
-def get_appointment_details():
-    email = read_email_from_session()
-    # Ensure your MongoDB connection/collection is correctly set up here
-    user_data = collection.find_one({"email": email})
     
-    if user_data and "appointment" in user_data:
-        # Get current local system time
-        current_time = datetime.now()
-        
-        updated_appointments = []
-        for appointment in user_data["appointment"]:
-            # Combine date and time into a datetime object for local time
-            appointment_time = datetime.strptime(f"{appointment['date']} {appointment['time']}", "%Y-%m-%d %H:%M")
-            
-            if appointment_time >= current_time:
-                updated_appointments.append(appointment)
-        
-        # Update the database with the remaining (future) appointments
-        collection.update_one({"email": email}, {"$set": {"appointment": updated_appointments}})
-        
-        return updated_appointments
-    return []
-
-def delete_appointment(p_name,apt_detail):
-    email = read_email_from_session()
+def update_appointment(email, p_name, a_time, a_date):
     if not email:
         print("No email found in session.")
         return
 
-    if p_name is None or apt_detail is None:
+    if p_name is None or a_time is None or a_date is None:
         return
-    formatdata=apt_detail.split("(")[1].split(')')[0].replace("'","")
-    time=formatdata.split(",")[0].strip()
-    date=formatdata.split(",")[1].strip()
-    apt_data = {"name": p_name, "time": time, "date": date}
-    print(apt_data)
+
+    a_data = {"name": p_name, "time": a_time, "date": a_date}
+
     try:
         # Update the existing user document to add the contact
+        update_result = collection.update_one(
+            {"email": email, "appointment.name": p_name},
+            {"$set": {"appointment.$": a_data}},
+            upsert=False
+        )
+        
+        
+        if update_result.modified_count > 0:
+            print("appointment updated successfully.")
+            time_obj = datetime.fromisoformat(a_time)
+            time_formatted = time_obj.strftime('%H:%M')
+            print(time_formatted)
+            date_obj = datetime.fromisoformat(a_date)
+            date_formatted = date_obj.strftime('%Y-%m-%d')
+            
+            print(time_formatted, date_formatted)
+            schedule_appointment_notification(p_name, time_formatted, date_formatted)
+            return True
+        else:
+            print("No update was made, possibly because the contact already exists.")
+            return False
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+    
+
+def get_appointment_details(email):
+    
+    # Ensure your MongoDB connection/collection is correctly set up here
+    user_data = collection.find_one({"email": email})
+    try:
+        if user_data and "appointment" in user_data:
+            # Get current local system time
+            current_time = datetime.now()
+            print("Current Time :", current_time)
+            updated_appointments = []
+            print("All appointments:", user_data["appointment"])
+            for appointment in user_data["appointment"]:
+                print("Original appointment:", appointment)
+                # Combine date and time into a datetime object for local time
+                print("Appointment Time:", appointment["time"])
+                print("Appointment Date:", appointment["date"])
+                appointment_date_time = datetime.fromisoformat(appointment["date"][:-6])  # Parse appointment date
+                print("Appointment Date Time:", appointment_date_time)
+                appointment_time = datetime.fromisoformat(appointment["time"][:-6]).time()  # Parse appointment time
+                print("Appointment Time:", appointment_time)
+                appointment_sch = datetime.combine(appointment_date_time.date(), appointment_time)  # Combine date and time
+                print("Appointment Schedule:", appointment_sch)
+                
+                                                    
+                
+                if appointment_sch >= current_time:
+                    print("Appointment is in the future.")
+                    updated_appointments.append(appointment)
+            
+            # Update the database with the remaining (future) appointments
+            collection.update_one({"email": email}, {"$set": {"appointment": updated_appointments}})
+            
+            return updated_appointments
+        return []
+    except Exception as e:
+        print(f"Error: {e}")
+
+def delete_appointment(email,p_name):
+    
+    if not email:
+        print("No email found in session.")
+        return
+
+    if p_name is None:
+        return
+    print("p_name",p_name)
+    
+    try:
+       
+        apt_data = {"name": p_name}
+        print(apt_data)
+            # Update the existing user document to add the contact
         update_result = collection.update_one(
             {"email": email},
             {"$pull": {"appointment": apt_data}},
@@ -508,7 +569,7 @@ def delete_appointment(p_name,apt_detail):
             print("appointment deleted successfully.")
             return True
         else:
-            print("No update was made, possibly because the contact already exists.")
+            print("delete was not made, possibly because the appointment does not exist.")
             return False
 
     except Exception as e:
@@ -517,12 +578,12 @@ def delete_appointment(p_name,apt_detail):
 
 
     
-def send_notification():
+def send_notification(email):
     try:
-        med_timings = get_medications_details()
-        apt_timings = get_appointment_details()
+        med_timings = get_medications_details(email)
+        apt_timings = get_appointment_details(email)
         for med_timing in med_timings:
-            schedule_medication_notification(med_timing["name"], med_timing["time"])
+            schedule_medication_notification(med_timing["name"], med_timing["time"], med_timing["days"])
         for apt_timing in apt_timings:
             schedule_appointment_notification(apt_timing["name"], apt_timing["time"], apt_timing["date"])
     except Exception as e:
