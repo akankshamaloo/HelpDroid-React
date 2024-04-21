@@ -505,54 +505,53 @@ def send_notification():
         print("Error")
 
 
-def find_by_role_true():
-    # Define the query to find documents where 'role' exists and is true
-    user_role=read_role_from_session()
+def find_by_role_true(user_role,email):
+  
+    
     print(user_role)
-    if not user_role :
-        print("FALSE PATIENT")
-        query = {"role": {"$exists": True, "$eq": True}}
-        matching_documents = collection.find(query)
-        print(matching_documents)
+    # if not user_role :
+        
+    print("FALSE PATIENT")
+    query = {"role": {"$exists": True, "$eq": not user_role}}
+    matching_documents = collection.find(query)
+    print(matching_documents)
         # Format the results as a list of dictionaries containing 'name' and '_id'
-        results = [{'name': doc['name'], 'id': str(doc['_id'])} for doc in matching_documents]
-        print("res",results)
-        return results
-    else:
-        print("TRUE DOCTOR")
-        email=read_email_from_session()
-        email_doc = collection.find_one({"email": email})
+    results = [{'name': doc['name'], 'id': str(doc['_id'])} for doc in matching_documents]
+    print("res",results)
+    return results
+    # else:
+    #     print("TRUE DOCTOR")
+    #     email_doc = collection.find_one({"email": email})
     
         
         
         # Retrieve details for each receiver ID
-        receiver_ids = [item['receiver_id'] for item in email_doc['messages']]
-        print(receiver_ids)
-        receiver_details = []
+#         receiver_ids = [item['receiver_id'] for item in email_doc['messages']]
+#         print(receiver_ids)
+#         receiver_details = []
 
-        for receiver_id in receiver_ids:
-            # Convert the string ID to ObjectId for querying
-            object_id = ObjectId(receiver_id)
-            receiver_doc = collection.find_one({"_id": object_id}, {"name": 1})
+#         for receiver_id in receiver_ids:
+#             # Convert the string ID to ObjectId for querying
+#             object_id = ObjectId(receiver_id)
+#             receiver_doc = collection.find_one({"_id": object_id}, {"name": 1})
             
-            if receiver_doc:
-                receiver_details.append({
-                    'name': receiver_doc['name'],
-                    'id': str(receiver_doc['_id'])
-                })
-        print(receiver_details)
-        return receiver_details
+#             if receiver_doc:
+#                 receiver_details.append({
+#                     'name': receiver_doc['name'],
+#                     'id': str(receiver_doc['_id'])
+#                 })
+#         print(receiver_details)
+#         return receiver_details
 
         
 
-def append_message(receiver_id, text, is_sent):
-    sender_email = read_email_from_session()
-    sender_id = ObjectId(read_id_from_session())  # Convert sender ID from session to ObjectId
+def append_message(receiver_id, text,sender_id):
     receiver_id = ObjectId(receiver_id)
     timestamp = datetime.now()
+    sender_id = ObjectId(sender_id)
     print(sender_id, receiver_id)
     # Message for the sender: marking as 'sent'
-    sender_message = {'text': text, 'is_sent': is_sent, 'timestamp': timestamp}
+    sender_message = {'text': text, 'is_sent': True, 'timestamp': timestamp}
     # Message for the receiver: marking as 'received' (is_sent = False)
     receiver_message = {'text': text, 'is_sent': False, 'timestamp': timestamp}
 
@@ -580,17 +579,15 @@ def append_message(receiver_id, text, is_sent):
         )
         print("New sender_id added for receiver.")
 
-def fetch_messages( receiver_id):
-    # Convert receiver_id to ObjectId if it's stored as such in the database
-    email = read_email_from_session()
-    # Fetch the user document by email
+def fetch_messages( receiver_id, sender_id):
+    
     try:
         # Convert receiver_id to ObjectId if it's stored as such in the database
         receiver_oid = ObjectId(receiver_id)
-
+        sender_oid = ObjectId(sender_id)
         # Execute a query to fetch the messages directly
         user_doc = collection.find_one(
-            {'email': email, 'messages.receiver_id': receiver_oid},
+            {'_id': sender_oid, 'messages.receiver_id': receiver_oid},
             {'messages.$': 1}  # Project only the matching messages subdocument
         )
 

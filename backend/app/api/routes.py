@@ -4,10 +4,11 @@ from app.db.authentication import *
 from app.features.otp_generate import *
 from werkzeug.utils import secure_filename
 import os
+from flask_socketio import SocketIO, emit, join_room, leave_room
 
 def setup_routes(app):
     # Set the folder where uploaded files will be stored
-    app.config['UPLOAD_FOLDER'] = r'C:\Users\akank'
+    app.config['UPLOAD_FOLDER'] = r'C:\Users\sonad'
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Optional: Set a limit to the upload size
 
     # Ensure the upload directory exists
@@ -259,7 +260,28 @@ def setup_routes(app):
                 return jsonify({'data': 'Contact update failed'}), 401
         except Exception as e:
             return jsonify({'data': str(e)}), 500
-        
+
+    @app.route('/get-doctors', methods=['POST'])
+    def get_doctors():
+        data = request.get_json()
+        role_raw = data.get("role")
+
+        # Convert role to boolean
+        # Any non-empty string other than "false" (case insensitive) will be True
+        role = str(role_raw).lower() == "true"
+        print(role,"role")
+        email = data.get('email')
+        try:
+            # Assume `fetch_all_doctors` is a function that retrieves all doctors from your database
+            
+            doctors = find_by_role_true(role,email) 
+            return jsonify({'doctors': doctors}), 200
+           
+
+                
+        except Exception as e:
+            return jsonify({'message': str(e)}), 500
+
     @app.route('/remove-contacts', methods=['POST'])
     def remove_contacts():
         data=request.get_json()
@@ -277,3 +299,71 @@ def setup_routes(app):
                 return jsonify({'data': 'Contact delete failed'}), 401
         except Exception as e:
             return jsonify({'data': str(e)}), 500
+            
+    @app.route('/get-messages', methods=['POST'])
+    def get_messages():
+        data=request.get_json()
+        sender_id=data.get('sender_id')
+        receiver_id=data.get('receiver_id')
+        print(data)
+
+        if not all([sender_id,receiver_id]):
+            return jsonify({'data': 'Missing required fields'}), 400
+        try:
+            success=fetch_messages(receiver_id,sender_id)
+            return jsonify({'data': success}), 200
+          
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+    @app.route('/save-messages', methods=['POST'])
+    def save_messages():
+        data=request.get_json()
+        sender_id=data.get('sender_id')
+        receiver_id=data.get('receiver_id')
+        text =data.get('text')
+        print(data)
+
+        if not all([sender_id,receiver_id]):
+            return jsonify({'data': 'Missing required fields'}), 400
+        try:
+            append_messages(receiver_id,text,sender_id)
+            return jsonify({'data': "Successfully added"}), 200
+          
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+    
+    socketio = SocketIO(app, cors_allowed_origins="*")  
+
+    @socketio.on('join')
+    def on_join(data):
+        sender_id = data['sender_id']
+        receiver_id = data['receiver_id']
+        room = get_room(sender_id, receiver_id)
+        join_room(room)
+        print(f'{sender_id} has entered room: {room}')
+
+    @socketio.on('connect')
+    def handle_connect():
+        print('Client connected')
+
+    @socketio.on('disconnect')
+    def handle_disconnect():
+        print('Client disconnected')
+
+    @socketio.on('send_message')
+    def handle_send_message(json):
+        sender_id = json['sender_id']
+        receiver_id = json['receiver_id']
+        room = get_room(sender_id, receiver_id)
+        emit('receive_message', json, room=room)
+        append_message(receiver_id,json['text'],sender_id)
+      
+    @socketio.on('leave')
+    def on_leave(data):
+        room = get_room_name(data['sender_id'], data['receiver_id'])
+        leave_room(room)
+        print(f'{data["sender_id"]} left room: {room}')
+
+    def get_room(user1, user2):
+        return '-'.join(sorted([user1, user2]))
+
