@@ -18,7 +18,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 function Sidebar({ openSidebarToggle, OpenSidebar }) {
-  const [role, setRole] = useState(sessionStorage.getItem("role"));
+  const [role, setRole] = useState(sessionStorage.getItem("role") + "");
   const [clickedSection, setClickedSection] = useState("");
   const handleClickSection = (section) => {
     setClickedSection(section);
@@ -64,57 +64,69 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
             <BsGrid1X2Fill className="icon" /> Dashboard
           </a>
         </li>
-        <li className="sidebar-list-item">
-          <div onClick={() => handleClickSection("prescription")}>
-            <BsFillArchiveFill className="icon" /> Prescription
-          </div>
-          {clickedSection === "prescription" && (
-            <>
-              <ListItem button component="a" href="/uploadprescription">
-                <ListItemIcon>
-                  <CloudUploadIcon />
-                </ListItemIcon>
-                <ListItemText primary="Upload Prescription" />
-              </ListItem>
-              <ListItem button component="a" href="/managepresciption">
-                <ListItemIcon>
-                  <ManageSearchIcon />
-                </ListItemIcon>
-                <ListItemText primary="Manage Prescription" />
-              </ListItem>
-            </>
-          )}
-        </li>
-        <li className="sidebar-list-item">
-          <a href="/managemedication">
-            <BsFillGrid3X3GapFill className="icon" /> Medication Reminder
-          </a>
-        </li>
-        <li className="sidebar-list-item">
-          <a href="/contact">
-            <BsPeopleFill className="icon" /> Emergency Contacts
-          </a>
-        </li>
-        <li className="sidebar-list-item">
-          <a href="/doctorlist">
-            <BsListCheck className="icon" /> Chat with Doctor
-          </a>
-        </li>
-        <li className="sidebar-list-item">
-          <a href="/checkhealth">
-            <LocalHospitalIcon className="icon" /> Check Your Health
-          </a>
-        </li>
-        <li className="sidebar-list-item">
-          <a href="">
-            <BsFillGearFill className="icon" /> Setting
-          </a>
-        </li>
-        <li className="sidebar-list-item center-aligned">
-          <button className="emergency-button" onClick={handleEmergency}>
-            <BsFillHeartPulseFill className="icon heart-icon" />
-          </button>
-        </li>
+        {role == "false" ? (
+          <>
+            <li className="sidebar-list-item">
+              <div onClick={() => handleClickSection("prescription")}>
+                <BsFillArchiveFill className="icon" /> Prescription
+              </div>
+              {clickedSection === "prescription" && (
+                <>
+                  <ListItem button component="a" href="/uploadprescription">
+                    <ListItemIcon>
+                      <CloudUploadIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Upload Prescription" />
+                  </ListItem>
+                  <ListItem button component="a" href="/managepresciption">
+                    <ListItemIcon>
+                      <ManageSearchIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Manage Prescription" />
+                  </ListItem>
+                </>
+              )}
+            </li>
+            <li className="sidebar-list-item">
+              <a href="/managemedication">
+                <BsFillGrid3X3GapFill className="icon" /> Medication Reminder
+              </a>
+            </li>
+            <li className="sidebar-list-item">
+              <a href="/contact">
+                <BsPeopleFill className="icon" /> Emergency Contacts
+              </a>
+            </li>
+            <li className="sidebar-list-item">
+              <a href="/doctorlist">
+                <BsListCheck className="icon" /> Chat with Doctor
+              </a>
+            </li>
+            <li className="sidebar-list-item">
+              <a href="/checkhealth">
+                <LocalHospitalIcon className="icon" /> Check Your Health
+              </a>
+            </li>
+          </>
+        ) : (
+          <>
+            <li className="sidebar-list-item">
+              <a href="/managemedication">
+                <BsFillGrid3X3GapFill className="icon" /> Appointment Reminder
+              </a>
+            </li>
+            <li className="sidebar-list-item">
+              <a href="/doctorlist">
+                <BsListCheck className="icon" /> Chat with Patient
+              </a>
+            </li>
+            <li className="sidebar-list-item">
+              <a href="">
+                <BsFillGearFill className="icon" /> Setting
+              </a>
+            </li>
+          </>
+        )}
       </ul>
     </aside>
   );
