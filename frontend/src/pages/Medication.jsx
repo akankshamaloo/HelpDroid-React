@@ -73,23 +73,25 @@ function MedicationSchedule() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.post("http://localhost:5000/get-medication", {
-          'email': sessionStorage.getItem('user_email')
-        });
+        const response = await axios.post(
+          "http://localhost:5000/get-medication",
+          {
+            email: sessionStorage.getItem("user_email"),
+          }
+        );
         console.log(response);
 
         if (response.status === 200) {
           // Add unique IDs to each contact
-          const rowsWithIds = response.data.data.map(row => ({
+          const rowsWithIds = response.data.data.map((row) => ({
             ...row,
-            id: uuidv4()
+            id: uuidv4(),
           }));
           setRows(rowsWithIds);
           console.log(rowsWithIds);
         } else {
           toast.error(response.data.message || "Failed to fetch contacts.");
         }
-
       } catch (err) {
         // Handle error
       }
@@ -160,7 +162,7 @@ function MedicationSchedule() {
         console.log("Failed to remove medication");
         toast.error("Failed to remove medication");
       }
-    } catch (err) { }
+    } catch (err) {}
   };
 
   const handleSave = async () => {
@@ -189,11 +191,10 @@ function MedicationSchedule() {
         );
         if (response.status === 200) {
           toast.success("Medication updated successfully");
-        }
-        else {
+        } else {
           toast.error(response.data.message || "Failed to update medication");
         }
-      } catch (err) { }
+      } catch (err) {}
     } else {
       setRows([
         ...rows,
@@ -204,19 +205,18 @@ function MedicationSchedule() {
         const response = await axios.post(
           "http://localhost:5000/upload-medication",
           {
-            'email': sessionStorage.getItem("user_email"),
-            'medication': formData.name,
-            'time': formattedTime,
-            'days': selectedDays,
-          });
+            email: sessionStorage.getItem("user_email"),
+            medication: formData.name,
+            time: formattedTime,
+            days: selectedDays,
+          }
+        );
         if (response.status === 200) {
           toast.success("Medication added successfully");
-        }
-        else {
+        } else {
           toast.error(response.data.message || "Failed to add medication");
         }
-
-      } catch (err) { }
+      } catch (err) {}
     }
 
     handleClose();

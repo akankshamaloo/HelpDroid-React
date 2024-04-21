@@ -378,7 +378,11 @@ def setup_routes(app):
 
     @socketio.on('connect')
     def handle_connect():
-        print('Client connected')
+        # Assume user_id is stored in the session or passed as part of the connection handshake
+        user_id = request.args.get('user_id')
+        join_room(user_id)
+        print(f'User {user_id} connected and joined their room')
+
 
     @socketio.on('disconnect')
     def handle_disconnect():
@@ -394,6 +398,7 @@ def setup_routes(app):
       
     @socketio.on('leave')
     def on_leave(data):
+        room = get_room(data['sender_id'], data['receiver_id'])
         room = get_room(data['sender_id'], data['receiver_id'])
         leave_room(room)
         print(f'{data["sender_id"]} left room: {room}')
