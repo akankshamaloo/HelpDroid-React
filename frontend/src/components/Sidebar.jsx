@@ -8,7 +8,8 @@ import {
   BsListCheck,
   BsMenuButtonWideFill,
   BsFillGearFill,
-  BsFillHeartPulseFill
+  BsFillHeartPulseFill,
+  BsFillPersonFill
 } from "react-icons/bs";
 import { ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -127,8 +128,8 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
               </a>
             </li>
             <li className="sidebar-list-item">
-              <a href="">
-                <BsFillGearFill className="icon" /> Setting
+              <a href="/editprofile">
+                <BsFillPersonFill className="icon" /> Edit Profile
               </a>
             </li>
           </>
