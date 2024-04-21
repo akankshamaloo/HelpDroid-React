@@ -11,6 +11,7 @@ import ContactSchedule from "./pages/contact";
 import DoctorList from "./pages/doctorlist";
 import Doctor from "./pages/doctor";
 import AppointmentSchedule from "./pages/appointments";
+import EditProfile from "./pages/editprofile";
 
 function App() {
   return (
@@ -30,7 +31,7 @@ function App() {
         <Route path="/doctorlist" element={<DoctorList />} />
         <Route path="/doctor" element={<Doctor />} />
         <Route path="/manageappoint" element={<AppointmentSchedule />} />
-
+        <Route path="/editprofile" element={< EditProfile />} />
       </Routes>
     </Router>
   );
