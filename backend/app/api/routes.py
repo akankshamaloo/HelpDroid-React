@@ -10,7 +10,7 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 
 def setup_routes(app):
     # Set the folder where uploaded files will be stored
-    app.config['UPLOAD_FOLDER'] = r'C:\Users\sonad'
+    app.config['UPLOAD_FOLDER'] = r'C:\Users\akank'
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Optional: Set a limit to the upload size
 
     # Ensure the upload directory exists
@@ -346,7 +346,7 @@ def setup_routes(app):
         if not all([sender_id,receiver_id]):
             return jsonify({'data': 'Missing required fields'}), 400
         try:
-            append_messages(receiver_id,text,sender_id)
+            append_message(receiver_id,text,sender_id)
             return jsonify({'data': "Successfully added"}), 200
           
         except Exception as e:
@@ -385,6 +385,7 @@ def setup_routes(app):
     @socketio.on('leave')
     def on_leave(data):
         room = get_room(data['sender_id'], data['receiver_id'])
+        room = get_room(data['sender_id'], data['receiver_id'])
         leave_room(room)
         print(f'{data["sender_id"]} left room: {room}')
 
@@ -415,8 +416,70 @@ def setup_routes(app):
                     send_sms(contact.get("mobile"),message)
             return jsonify({'data': 'Emergency Mail sent successfully'}), 200
         except Exception as e:
-            self.retry(exc=e, max_retries=3, countdown=60)
-            print(e)
-
-
+            return jsonify({'data': str(e)}), 500
+        
+    @app.route('/upload-appointment', methods=['POST'])
+    def upload_appointment():
+        data=request.get_json()
+        email=data.get('email')
+        pname=data.get('appointment')
+        time=data.get('time')
+        date=data.get('date')
+        
+        print(data)
+        if not all([email,pname,time,date]):
+            return jsonify({'data': 'Missing required fields'}), 400
+        try:
+            success=insert_appointment(email,pname,time,date)
+            if success:
+                return jsonify({'data': 'Appointment uploaded successfully'}), 200
+            else:
+                return jsonify({'data': 'Appointment upload failed'}), 401
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
     
+    @app.route('/get-appointments', methods=['POST'])
+    def get_appointments():
+        email=request.json.get('email')
+        if not email:
+            return jsonify({'data': 'Missing required fields'}), 400
+        try:
+            data=get_appointment_details(email)
+            print(data)
+            return jsonify({'data': data}), 200
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+        
+    @app.route('/remove-appointment', methods=['POST'])
+    def remove_appointment():
+        print(request.json)
+        email=request.json.get('email')
+        pname=request.json.get('appointment')
+        if not all([email,pname]):
+            return jsonify({'data': 'Missing required fields'}), 400
+        try:
+            success=delete_appointment(email,pname)
+            if success:
+                return jsonify({'data': 'Appointment deleted successfully'}), 200
+            else:
+                return jsonify({'data': 'Appointment delete failed'}), 401
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+        
+    @app.route('/edit-appointment', methods=['POST'])
+    def edit_appointment():
+        print(request.json)
+        email=request.json.get('email')
+        pname=request.json.get('appointment')
+        time=request.json.get('time')
+        date=request.json.get('date')
+        if not all([email,pname,time,date]):
+            return jsonify({'data': 'Missing required fields'}), 400
+        try:
+            success=update_appointment(email,pname,time,date)
+            if success:
+                return jsonify({'data': 'Appointment updated successfully'}), 200
+            else:
+                return jsonify({'data': 'Appointment update failed'}), 401
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500

@@ -104,7 +104,7 @@ const Login = () => {
           console.log(role, user_id);
           setTimeout(() => {
             if (role) {
-              n("/admin");
+              n("/doctor");
             } else {
               n("/patient");
             }
@@ -113,7 +113,7 @@ const Login = () => {
       } catch (error) {
         toast.error("Invalid Credentials");
       }
-    } catch (error) {}
+    } catch (error) { }
   };
 
   // JSX structure for the Login component

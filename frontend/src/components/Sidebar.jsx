@@ -8,7 +8,8 @@ import {
   BsListCheck,
   BsMenuButtonWideFill,
   BsFillGearFill,
-  BsFillHeartPulseFill
+  BsFillHeartPulseFill,
+  BsFillPersonFill
 } from "react-icons/bs";
 import { ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -107,11 +108,17 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
                 <LocalHospitalIcon className="icon" /> Check Your Health
               </a>
             </li>
+            <li className="sidebar-list-item center-aligned">
+              {/* Emergency button */}
+              <button className="emergency-button" onClick={handleEmergency}>
+                <BsFillHeartPulseFill className="icon heart-icon" />
+              </button>
+            </li>
           </>
         ) : (
           <>
             <li className="sidebar-list-item">
-              <a href="/managemedication">
+              <a href="/manageappoint">
                 <BsFillGrid3X3GapFill className="icon" /> Appointment Reminder
               </a>
             </li>
@@ -121,8 +128,8 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
               </a>
             </li>
             <li className="sidebar-list-item">
-              <a href="">
-                <BsFillGearFill className="icon" /> Setting
+              <a href="/editprofile">
+                <BsFillPersonFill className="icon" /> Edit Profile
               </a>
             </li>
           </>
