@@ -243,8 +243,9 @@ def setup_routes(app):
 
         try:
             print("inside try")
-            appiontment_count, chat_count = get_doc_statistics(email)
-            return jsonify({'appiontment_count': appiontment_count, 'chat_count': chat_count}), 200
+            appiontment_count, chat_count , seven= get_doc_statistics(email)
+            print(appiontment_count, chat_count,seven)
+            return jsonify({'appiontment_count': appiontment_count, 'chat_count': chat_count,'seven':seven}), 200
         except Exception as e:
             return jsonify({'data': str(e)}), 500
         
@@ -532,5 +533,7 @@ def setup_routes(app):
             return jsonify({'data': details}), 200
         except Exception as e:
             return jsonify({'data': str(e)}), 500
+        
+    
     
 

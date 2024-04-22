@@ -38,6 +38,7 @@ function Home_Doc() {
     const [temperature, setTemperature] = useState(0);
     const [pulse, setPulse] = useState(0);
     const [oxygenLevel, setOxygenLevel] = useState(0);
+    const [graph, setGraph] = useState(0);
 
     useEffect(() => {
         const fetchCounts = async () => {
@@ -53,6 +54,7 @@ function Home_Doc() {
                 if (response.status === 200) {
                     setReminders(response.data.appiontment_count);
                     setDoctors(response.data.chat_count);
+                    setGraph(response.data.seven)
                 }
             } catch (error) {
                 console.error("Failed to fetch counts:", error);
@@ -65,21 +67,15 @@ function Home_Doc() {
     const dummyData = [
         {
             date: "2024-04-14",
-            spo2: 98,
-            temperature: 98.6,
-            pulse: 70,
+            count: 1
         },
         {
             date: "2024-04-15",
-            spo2: 97,
-            temperature: 99.0,
-            pulse: 75,
+            count: 2,
         },
         {
             date: "2024-04-16",
-            spo2: 99,
-            temperature: 97.8,
-            pulse: 72,
+            count: 3,
         },
         // ... more dummy data ...
     ];
@@ -133,7 +129,7 @@ function Home_Doc() {
 
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart
-                        data={dummyData}
+                        data={graph}
                         margin={{
                             top: 5,
                             right: 30,
@@ -148,65 +144,15 @@ function Home_Doc() {
                         <Legend />
                         <Line
                             type="monotone"
-                            dataKey="spo2"
+                            dataKey="count"
                             stroke="#8884d8"
                             strokeWidth={3}
-                            name="SpO2 Level"
+                            name="count"
                         />
-                        <Line
-                            type="monotone"
-                            dataKey="temperature"
-                            stroke="#82ca9d"
-                            strokeWidth={3}
-                            name="Temperature (°F)"
-                        />
-                        <Line
-                            type="monotone"
-                            dataKey="pulse"
-                            stroke="#FF8042"
-                            strokeWidth={3}
-                            name="Pulse Rate"
-                        />
+
                     </LineChart>
                 </ResponsiveContainer>
-                <ResponsiveContainer height="100%">
-                    <Paper
-                        elevation={3}
-                        className="health-parameters"
-                        style={{
-                            margin: "1rem",
-                            padding: "1rem",
-                            backgroundColor: "#fff0f0",
-                        }}
-                    >
-                        <Card>
-                            <CardContent>
-                                <Typography
-                                    variant="h6"
-                                    component="div"
-                                    style={{ marginBottom: "0.5rem", font: FaBold }}
-                                >
-                                    Your Last Health Parameters
-                                </Typography>
-                                <Typography
-                                    variant="body2"
-                                    style={{ marginBottom: "0.5rem", fontSize: "1rem" }}
-                                >
-                                    <OxygenIcon /> SpO2 Level: {oxygenLevel}%
-                                </Typography>
-                                <Typography
-                                    variant="body2"
-                                    style={{ marginBottom: "0.5rem", fontSize: "1rem" }}
-                                >
-                                    <ThermostatIcon /> Temperature: {temperature}°F
-                                </Typography>
-                                <Typography variant="body2" style={{ fontSize: "1rem" }}>
-                                    <FavoriteBorderIcon /> Pulse Rate: {pulse} bpm
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Paper>
-                </ResponsiveContainer>
+
             </div>
         </main>
     );
