@@ -28,21 +28,70 @@ def setup_routes(app):
         dob = data.get('dob')
         gender = data.get('gender')
         category = data.get('category')
+        specialization = data.get('specialization','')
+        fees = data.get('fees','')
+        experience = data.get('experience','')
+        
+
         print(data)
-        print(email, password, name, mobile, role,dob,gender,category)
+        print(email, password, name, mobile, role,dob,gender,category,specialization,fees,experience)
         # Check if all required fields are present
         # if not (email and password and name and mobile and role):
         #     return jsonify({'data': 'Missing required fields'}), 400
 
 
-        success,user_id = reg_auth(email, password, name, mobile, role,dob,gender,category)
+        success,user_id = reg_auth(email, password, name, mobile, role,dob,gender,category,specialization,fees,experience)
 
         # Check if registration/authentication was successful
         if success:
             return jsonify({'data': 'Registration successful', 'user_id': str(user_id)}), 200
         else:
             return jsonify({'data': 'Registration failed'}), 500
+    @app.route('/update-data', methods=['POST'])
+    def updatedata():
+        data = request.get_json()
+        payload = data.get('data')
+        user_id = data.get('id')
 
+       
+
+        try:
+            # Assume loginotpcheck fetches the user and checks the password
+            result=update_data(user_id,payload)
+            if result:
+                # This is just a simple implementation, password checking logic should be added
+                return jsonify({'data': 'Successfully updated'}), 200
+            else:
+                return jsonify({'data': 'Failed to Update'}), 401
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+    @app.route('/delete-data', methods=['POST'])
+    def deletedata():
+        data = request.get_json()
+     
+        user_id = data.get('id')
+
+       
+
+        try:
+            # Assume loginotpcheck fetches the user and checks the password
+            result=delete_data_by_id(user_id)
+            if result:
+                # This is just a simple implementation, password checking logic should be added
+                return jsonify({'data': 'Successfully deleted'}), 200
+            else:
+                return jsonify({'data': 'Failed to delete'}), 401
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+    @app.route('/appointments-today-total', methods=['GET'])
+    def appointmentsTodayTotal():
+      
+
+        try:
+          return jsonify(count_todays_appointments()), 200
+           
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
 
     @app.route('/login', methods=['POST'])
     def login():
@@ -307,11 +356,12 @@ def setup_routes(app):
         # Any non-empty string other than "false" (case insensitive) will be True
         role = str(role_raw).lower() == "true"
         print(role,"role")
-        email = data.get('email')
+        #  email = data.get('email')
         try:
             # Assume `fetch_all_doctors` is a function that retrieves all doctors from your database
             
-            doctors = find_by_role_true(role,email) 
+            doctors = find_by_role_true(role) 
+            print("doc",doctors)
             return jsonify({'doctors': doctors}), 200
            
 
@@ -365,6 +415,14 @@ def setup_routes(app):
         try:
             append_message(receiver_id,text,sender_id)
             return jsonify({'data': "Successfully added"}), 200
+          
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+    @app.route('/graph-admin', methods=['GET'])
+    def graph_admin():
+        try:
+            
+            return jsonify(retrieve_stats()), 200
           
         except Exception as e:
             return jsonify({'data': str(e)}), 500
@@ -513,7 +571,6 @@ def setup_routes(app):
                 return jsonify({'data': 'Appointment update failed'}), 401
         except Exception as e:
             return jsonify({'data': str(e)}), 500
-<<<<<<< HEAD
     
     @app.route('/send-sms', methods=['POST'])
     def send_message():
@@ -526,7 +583,6 @@ def setup_routes(app):
             return jsonify({'success': True, 'message': 'Sent successfully'}), 200
         except Exception as e:
             return jsonify({'success': False, 'message': str(e)}), 500
-=======
 
     @app.route('/doctor-details',methods=['POST'])
     def doctor_details():
@@ -548,4 +604,3 @@ def setup_routes(app):
             return jsonify({'data': str(e)}), 500
     
 
->>>>>>> e518e9c5da508d88392d5dfb3b8809f78079c3f1

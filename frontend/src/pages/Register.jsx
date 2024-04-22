@@ -21,9 +21,6 @@ const Register = () => {
   const [otpSent, setOTPSent] = useState(false);
   const [dob, setDOB] = useState("");
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
