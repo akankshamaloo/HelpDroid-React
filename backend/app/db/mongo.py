@@ -396,9 +396,9 @@ def get_doc_statistics(email):
     # Initialize counters
     appointment_count = 0
     unique_receiver_ids = set()
+    appointment_dates_count = {}
 
     try:
-        print("email",email)
         # Retrieve the user document by email
         user_document = collection.find_one({"email": email})
 
@@ -408,12 +408,33 @@ def get_doc_statistics(email):
             current_date = datetime.now().strftime("%Y-%m-%d")
 
             for appointment in user_document.get("appointment", []):
-                print(appointment)
-                if appointment.get("date", "").split("T")[0] == current_date:
-                    print("Appointment found for today.")
+                appointment_date = appointment.get("date", "").split("T")[0]
+                if appointment_date == current_date:
                     appointment_count += 1
-            
 
+                # Count appointments for each date for the last 7 days
+                if appointment_date in appointment_dates_count:
+                    appointment_dates_count[appointment_date] += 1
+                else:
+                    appointment_dates_count[appointment_date] = 1
+
+                try:
+                     # Calculate the date 7 days ago
+                    seven_days_ago = datetime.now() - timedelta(days=7)
+                    
+                    # Convert date strings in appointments to datetime objects and delete appointments older than 7 days
+                    result = collection.update_one(
+                        {"email": email},
+                        {"$pull": {"appointment": {"date": {"$lt": seven_days_ago.isoformat()}}}}
+                    )
+                    
+                    if result.modified_count > 0:
+                        print("Old appointments deleted successfully.")
+                    else:
+                        print("No appointments were deleted.")
+                
+                except Exception as e:
+                    print(f"An error occurred while deleting appointments: {e}")
 
             # Count the number of unique receiver IDs for chats
             if "messages" in user_document:
@@ -422,14 +443,20 @@ def get_doc_statistics(email):
                     # Extract unique receiver IDs from the messages
                     unique_receiver_ids.update([message_group["receiver_id"]])
 
-            # Return the counts
-        return appointment_count, len(unique_receiver_ids)
+        # Calculate dates for the last 7 days
+        last_seven_days = [(datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
+
+        # Construct the object containing appointment counts for the last 7 days
+        # Construct the object containing appointment counts for the last 7 days
+        appointment_counts_last_seven_days = [{"date": date, "count": appointment_dates_count.get(date, 0)} for date in last_seven_days]
+
+
+        return appointment_count, len(unique_receiver_ids), appointment_counts_last_seven_days
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        return 0, 0 # Return zeros in case of any error 
-
-
+        return 0, 0, {}  
+        
 def insert_contact(email,email1=None, name='user', mobile=None):
     
     if not email:
@@ -686,8 +713,8 @@ def get_appointment_details(email):
                     print("Appointment is in the future.")
                     updated_appointments.append(appointment)
             
-            # Update the database with the remaining (future) appointments
-            collection.update_one({"email": email}, {"$set": {"appointment": updated_appointments}})
+            # # Update the database with the remaining (future) appointments
+            # collection.update_one({"email": email}, {"$set": {"appointment": updated_appointments}})
             
             return updated_appointments
         return []

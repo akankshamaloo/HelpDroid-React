@@ -12,6 +12,7 @@ import DoctorList from "./pages/doctorlist";
 import Doctor from "./pages/doctor";
 import AppointmentSchedule from "./pages/appointments";
 import EditProfile from "./pages/editprofile";
+import CheckHealth from "./pages/checkhealth";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/doctor" element={<Doctor />} />
         <Route path="/manageappoint" element={<AppointmentSchedule />} />
         <Route path="/editprofile" element={< EditProfile />} />
+        <Route path="/checkhealth" element={<CheckHealth />} />
       </Routes>
     </Router>
   );
