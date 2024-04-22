@@ -1,6 +1,7 @@
 import os
 
 from telesign.messaging import MessagingClient
+from twilio.rest import Client
 
 def send_sms(phn, msg):
     print("send_sms_reached")
@@ -26,3 +27,17 @@ def send_sms(phn, msg):
     # Display the response body in the console for debugging purposes. 
     # In your production code, you would likely remove this.
     print(f"\nResponse:\n{response.body}\n")
+    try:
+        account_sid = 'ACad11e8d7af05eacceb137e6225a364f7'
+        auth_token = '490a68b1e7db59c2c1aba3581e2df288'
+        client = Client(account_sid, auth_token)
+
+        message = client.messages.create(
+            from_='+14787392082',
+            body=msg,
+            to='+916287388363'
+        )
+
+        print(message.sid)
+    except Exception as e:
+        print(e)

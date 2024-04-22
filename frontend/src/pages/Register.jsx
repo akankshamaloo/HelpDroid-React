@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaUser, FaPhoneAlt, FaLock } from "react-icons/fa";
-import { MdEmail, MdVisibility, MdVisibilityOff } from "react-icons/md";
+import { FaUser, FaPhoneAlt, FaLock, FaRegCalendarAlt } from "react-icons/fa";
+import { MdEmail, MdVisibility, MdVisibilityOff, MdCategory } from "react-icons/md";
+import { CgGenderMale } from "react-icons/cg";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
@@ -13,6 +14,7 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isOTPPopupOpen, setIsOTPPopupOpen] = useState(false);
   const [otpSent, setOTPSent] = useState(false);
+  const [dob, setDOB] = useState("");
 
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
@@ -31,6 +33,9 @@ const Register = () => {
     const pass2 = document.getElementById("confirm-password").value;
     const email = document.getElementById("email").value;
     const ph = document.getElementById("phone").value;
+    const dob = document.getElementById("dob").value;
+    const gender = document.getElementById("gender").value;
+    const category = document.getElementById("category").value;
 
     // Validation checks
     if (name === "") {
@@ -51,6 +56,18 @@ const Register = () => {
     }
     if (ph === "") {
       toast.error("Phone cannot be empty");
+      return false;
+    }
+    if (dob === "") {
+      toast.error("Date of Birth cannot be empty");
+      return false;
+    }
+    if (gender === "") {
+      toast.error("Gender cannot be empty");
+      return false;
+    }
+    if (category === "") {
+      toast.error("Category cannot be empty");
       return false;
     }
     if (pass1 !== pass2) {
@@ -104,6 +121,10 @@ const Register = () => {
     const email = document.getElementById("email").value;
     const phone = document.getElementById("phone").value;
     const role = document.getElementById("isAdmin").checked;
+    const dob = document.getElementById("dob").value;
+    const gender = document.getElementById("gender").value;
+    const category = document.getElementById("category").value;
+    console.log(name, password, email, phone, role, dob, gender, category)
 
     try {
       const response = await axios.post("http://localhost:5000/register", {
@@ -112,6 +133,9 @@ const Register = () => {
         'mobile': phone,
         'password': password,
         'role': role,
+        'dob': dob,
+        'gender': gender,
+        'category': category
       });
       if (response.status === 200) {
         toast.success("Registration successful!");
@@ -258,6 +282,26 @@ const Register = () => {
                       )}
                     </div>
                   </div>
+                  <div>
+                    <label
+                      htmlFor="dob"
+                      className="block mb-2 text-sm font-bold text-white"
+                    >
+                      Date of Birth
+                    </label>
+                    <div className="flex bg-slate-50 border p-3 rounded">
+                      <FaRegCalendarAlt className="mr-3" />
+                      <input
+                        type="date"
+                        name="dob"
+                        id="dob"
+                        value={dob}
+                        onChange={(e) => setDOB(e.target.value)}
+                        className="bg-transparent border-none border-b-gray-300 text-slate-600 sm:text-sm -md outline-none block w-full  "
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-5 w-full">
@@ -300,6 +344,45 @@ const Register = () => {
                       />
                     </div>
                   </div>
+
+                  <div>
+                    <label
+                      htmlFor="gender"
+                      className="block mb-2 text-sm font-bold text-white "
+                    >
+                      Gender
+                    </label>
+                    <div className="flex bg-slate-50 border p-3 rounded">
+                      <CgGenderMale className='mr-3 text-xl' />
+                      <select className="bg-transparent border-none border-b-gray-300 text-slate-600 sm:text-sm -md outline-none block w-full  "
+                        name="gender" id="gender">
+                        <option className='rounded-none text-gray-900' value="">Selet gender</option>
+                        <option className='rounded-none text-gray-900' value="Male">Male</option>
+                        <option className='rounded-none text-gray-900' value="Female">Female</option>
+                        <option className='rounded-none text-gray-900' value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="category"
+                      className="block mb-2 text-sm font-bold text-white "
+                    >
+                      Category
+                    </label>
+                    <div className="flex bg-slate-50 border p-3 rounded">
+                      <MdCategory className='mr-3 text-xl' />
+                      <select className="bg-transparent border-none border-b-gray-300 text-slate-600 sm:text-sm -md outline-none block w-full "
+                        name="category" id="category">
+                        <option className='rounded-none text-gray-900' value="">Selet a category</option>
+                        <option className='rounded-none text-gray-900' value="General">General</option>
+                        <option className='rounded-none text-gray-900' value="SC/ST">SC/ST</option>
+                        <option className='rounded-none text-gray-900' value="OBC">OBC</option>
+                      </select>
+                    </div>
+                  </div>
+
                 </div>
               </div>
 

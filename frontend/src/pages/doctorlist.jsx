@@ -157,8 +157,18 @@ function DoctorList() {
     ...(role == "true"
       ? []
       : [
-          { field: "specialization", headerName: "Specialization", width: 200 },
-        ]),
+        { field: "specialization", headerName: "Specialization", width: 200 },
+      ]),
+    ...(role == "false"
+      ? [
+        { field: "fees", headerName: "Fees Charged", width: 150 },
+      ]
+      : []),
+    ...(role == "false"
+      ? [
+        { field: "yearsOfExperience", headerName: "Years Of Experience", width: 150 },
+      ]
+      : []),
 
     { field: "contact", headerName: "Contact Number", width: 150 },
     {
