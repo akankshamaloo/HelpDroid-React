@@ -27,12 +27,12 @@ collection2 = db['user_registered']
 
 # Insert a document into the collection
 
-def insert_data(email,password,mobile,name,role):
+def insert_data(email,password,mobile,name,role,dob,gender,category):
     # data = {'email': email, 'password': password,'mobile':mobile, 'name': name}
     # collection.insert_one(data)
     try:        
         hash = sha256.sha256(password+""+email)        
-        data = {'email': email, 'password': hash,'mobile':mobile, 'name': name, 'role':role}
+        data = {'email': email, 'password': hash,'mobile':mobile, 'name': name, 'role':role,'dob':dob,'gender':gender,'category':category}
         print(data)
         id=collection.insert_one(data)
         print("Inserted")
@@ -642,7 +642,7 @@ def find_by_role_true(user_role,email):
     matching_documents = collection.find(query)
     print(matching_documents)
         # Format the results as a list of dictionaries containing 'name' and '_id'
-    results = [{'name': doc['name'], 'id': str(doc['_id'])} for doc in matching_documents]
+    results = matching_documents
     print("res",results)
     return results
     # else:
@@ -728,3 +728,62 @@ def fetch_messages( receiver_id, sender_id):
     except Exception as e:
         print(f"An error occurred: {e}")
         return []  # Return an empty list or appropriate
+    
+
+def doc_details(email,specializations,yearsOfExperience,fees,addresses):
+    
+    if not email:
+        print("No email found in session.")
+        return
+
+    if not specializations or not yearsOfExperience or not fees or not addresses:
+        print("Missing required data.")
+        return
+
+    try:
+        existing_user = collection.find_one({"email": email})
+        if existing_user and "doctor_details" in existing_user:
+            # Doctor details already exist, so we need to replace them
+            update_result = collection.update_one(
+                {"email": email},
+                {
+                    "$set": {
+                        "doctor_details": {
+                            "specializations": specializations,
+                            "yearsOfExperience": yearsOfExperience,
+                            "fees": fees,
+                            "addresses": addresses
+                        }
+                    }
+                },
+                upsert=False
+            )
+        else:
+            # Doctor details don't exist, so insert them
+            update_result = collection.update_one(
+                {"email": email},
+                {
+                    "$set": {
+                        "doctor_details": {
+                            "specializations": specializations,
+                            "yearsOfExperience": yearsOfExperience,
+                            "fees": fees,
+                            "addresses": addresses
+                        }
+                    }
+                },
+                upsert=True
+            )
+
+        if update_result.modified_count > 0:
+            print("Doctor details inserted/updated successfully.")
+            return True
+        else:
+            print("No update was made.")
+            return False
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+
+    

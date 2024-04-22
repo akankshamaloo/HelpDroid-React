@@ -442,11 +442,22 @@ body {
 /* Sidebar  */
 #sidebar {
   grid-area: sidebar;
-  height: 100%;
   background-color: #263043;
   overflow-y: auto;
+  /* Allows scrolling if content is longer than the screen */
   transition: all 0.5s;
   -webkit-transition: all 0.5s;
+  height: 100%;
+  /* Occupies the height of the grid container */
+  min-height: 100vh;
+  /* Ensures it always takes at least the full viewport height */
+}
+
+@media (min-width: 992px) {
+  #sidebar {
+    height: 100vh;
+    /* Ensures sidebar always matches viewport height on wider screens */
+  }
 }
 
 .sidebar-title {

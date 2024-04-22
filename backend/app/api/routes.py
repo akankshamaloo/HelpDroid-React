@@ -25,20 +25,23 @@ def setup_routes(app):
         name = data.get('name')
         mobile = data.get('mobile')
         role = data.get('role')
+        dob = data.get('dob')
+        gender = data.get('gender')
+        category = data.get('category')
         print(data)
-        print(email, password, name, mobile, role)
+        print(email, password, name, mobile, role,dob,gender,category)
         # Check if all required fields are present
         # if not (email and password and name and mobile and role):
         #     return jsonify({'data': 'Missing required fields'}), 400
 
 
-        success,user_id = reg_auth(email, password, name, mobile, role)
+        success,user_id = reg_auth(email, password, name, mobile, role,dob,gender,category)
 
         # Check if registration/authentication was successful
         if success:
             return jsonify({'data': 'Registration successful', 'user_id': str(user_id)}), 200
         else:
-            return jsonify({'data': 'Registration failed'}), 400
+            return jsonify({'data': 'Registration failed'}), 500
 
 
     @app.route('/login', methods=['POST'])
@@ -510,6 +513,7 @@ def setup_routes(app):
                 return jsonify({'data': 'Appointment update failed'}), 401
         except Exception as e:
             return jsonify({'data': str(e)}), 500
+<<<<<<< HEAD
     
     @app.route('/send-sms', methods=['POST'])
     def send_message():
@@ -522,3 +526,26 @@ def setup_routes(app):
             return jsonify({'success': True, 'message': 'Sent successfully'}), 200
         except Exception as e:
             return jsonify({'success': False, 'message': str(e)}), 500
+=======
+
+    @app.route('/doctor-details',methods=['POST'])
+    def doctor_details():
+        print(request.json)
+        data=request.get_json()
+        email=data.get('email')
+        specializations= data.get('specializations') 
+        yearsOfExperience = data.get('yearsOfExperience')
+        fees=data.get('fees')
+        addresses=data.get('addresses')
+        
+        if not all([email,specializations,yearsOfExperience,fees,addresses]):
+            return jsonify({'data': 'Missing required fields'}), 400
+        
+        try:
+            details=doc_details(email,specializations,yearsOfExperience,fees,addresses)
+            return jsonify({'data': details}), 200
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+    
+
+>>>>>>> e518e9c5da508d88392d5dfb3b8809f78079c3f1

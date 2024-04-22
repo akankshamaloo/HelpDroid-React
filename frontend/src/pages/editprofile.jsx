@@ -12,6 +12,8 @@ import AddIcon from "@mui/icons-material/Add";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import dayjs from "dayjs";
 import Sidebar from "../components/Sidebar";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
 
 const specializations = [
   { label: "Cardiology" },
@@ -61,6 +63,8 @@ const EditProfile = () => {
   const currentTime = new Date().toISOString().substring(0, 16);
   const [loading, setLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedSpecializationLabel, setSelectedSpecializationLabel] =
+    useState("");
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -75,6 +79,10 @@ const EditProfile = () => {
         days: [],
       },
     ]);
+  };
+
+  const handleSpecializationChange = (event, newValue) => {
+    setSelectedSpecializationLabel(newValue.label); // Update the selected specialization label when the user selects a specialization
   };
 
   const handleChange = (index, field) => (event) => {
@@ -92,6 +100,39 @@ const EditProfile = () => {
       newAddresses[index].days.splice(currentIndex, 1);
     }
     setAddresses(newAddresses);
+  };
+
+  const handleSave = async () => {
+    const selectedSpecialization = specializations.find(
+      (spec) => spec.label === selectedSpecializationLabel
+    );
+    console.log({
+      addresses,
+      fees,
+      yearsOfExperience,
+      selectedSpecialization,
+      selectedSpecializationLabel,
+    });
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/doctor-details",
+        {
+          email: sessionStorage.getItem("user_email"),
+          specializations: selectedSpecialization.label,
+          fees: fees,
+          yearsOfExperience: yearsOfExperience,
+          addresses: addresses,
+        }
+      );
+      console.log(response);
+      if (response.status === 200) {
+        toast.success("Profile updated successfully!");
+      } else {
+        toast.error("Failed to update profile");
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -132,6 +173,7 @@ const EditProfile = () => {
               },
             },
           }}
+          onChange={handleSpecializationChange}
         />
         <TextField
           fullWidth
@@ -243,11 +285,21 @@ const EditProfile = () => {
           variant="outlined"
           startIcon={<AddIcon sx={{ color: "white" }} />}
           onClick={handleAddAddress}
-          sx={{ color: "white", borderColor: "white" }}
+          sx={{ color: "white", borderColor: "white", mt: 2 }} // Add mt (margin-top) to create space
         >
           Add Another Address
         </Button>
+        <br />
+        <Button
+          variant="contained"
+          startIcon={<AddIcon sx={{ color: "white" }} />}
+          onClick={handleSave} // Call handleSave function on button click
+          sx={{ color: "white", borderColor: "white", mt: 2 }} // Add mt (margin-top) to create space
+        >
+          Save
+        </Button>
       </Box>
+      <ToastContainer />
     </div>
   );
 };

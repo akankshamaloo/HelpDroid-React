@@ -10,8 +10,7 @@ import {
   BsFillGearFill,
   BsFillHeartPulseFill,
   BsFillPersonFill,
-  BsChevronRight,
-  BsChevronLeft,
+  BsBoxArrowRight,
 } from "react-icons/bs";
 
 import { ListItem, ListItemIcon, ListItemText } from "@mui/material";
@@ -20,10 +19,13 @@ import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 function Sidebar({ OpenSidebar, toggleSidebar }) {
   const [role, setRole] = useState(sessionStorage.getItem("role") + "");
   const [clickedSection, setClickedSection] = useState("");
+  const n = useNavigate();
+
   const handleClickSection = (section) => {
     setClickedSection(section);
   };
@@ -42,6 +44,13 @@ function Sidebar({ OpenSidebar, toggleSidebar }) {
       }
     } catch (err) {}
   };
+  const handleLogout = () => {
+    // Clear sessionStorage
+    sessionStorage.clear();
+    // Redirect to login page
+    n("/");
+  };
+
   //true doctor
   //false patient
   // if (!OpenSidebar)
@@ -113,6 +122,14 @@ function Sidebar({ OpenSidebar, toggleSidebar }) {
                 <LocalHospitalIcon className="icon" /> Check Your Health
               </a>
             </li>
+            <li className="sidebar-list-item">
+              <button className="logout-button" onClick={handleLogout}>
+                <div className="icon-text-container">
+                  <BsBoxArrowRight className="icon" />
+                  <span>Logout</span>
+                </div>
+              </button>
+            </li>
             <li className="sidebar-list-item center-aligned">
               {/* Emergency button */}
               <button className="emergency-button" onClick={handleEmergency}>
@@ -141,6 +158,14 @@ function Sidebar({ OpenSidebar, toggleSidebar }) {
               <a href="/editprofile">
                 <BsFillPersonFill className="icon" /> Edit Profile
               </a>
+            </li>
+            <li className="sidebar-list-item">
+              <button className="logout-button" onClick={handleLogout}>
+                <div className="icon-text-container">
+                  <BsBoxArrowRight className="icon" />
+                  <span>Logout</span>
+                </div>
+              </button>
             </li>
           </>
         )}

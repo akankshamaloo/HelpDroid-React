@@ -168,7 +168,7 @@ function MedicationSchedule() {
         console.log("Failed to remove medication");
         toast.error("Failed to remove medication");
       }
-    } catch (err) {}
+    } catch (err) { }
   };
 
   const handleSave = async () => {
@@ -200,7 +200,7 @@ function MedicationSchedule() {
         } else {
           toast.error(response.data.message || "Failed to update medication");
         }
-      } catch (err) {}
+      } catch (err) { }
     } else {
       setRows([
         ...rows,
@@ -222,7 +222,7 @@ function MedicationSchedule() {
         } else {
           toast.error(response.data.message || "Failed to add medication");
         }
-      } catch (err) {}
+      } catch (err) { }
     }
 
     handleClose();
