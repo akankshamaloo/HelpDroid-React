@@ -17,8 +17,15 @@ function DoctorList() {
   const [currentUserId, setCurrentUserId] = useState(
     sessionStorage.getItem("user_id")
   );
+
   const [role, setRole] = useState("" + sessionStorage.getItem("role"));
   // Function to handle the sending of messages
+  const [loading, setLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   const fetchDoctorsData = async () => {
     try {
       axios
@@ -185,7 +192,7 @@ function DoctorList() {
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
-      <Sidebar OpenSidebar={true} />
+      <Sidebar OpenSidebar={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <Box sx={{ flexGrow: 1, padding: "1rem", overflow: "auto" }}>
         <DataGrid
           rows={doctors}

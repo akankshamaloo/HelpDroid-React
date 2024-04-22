@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaPhoneAlt, FaLock, FaRegCalendarAlt } from "react-icons/fa";
-import { MdEmail, MdVisibility, MdVisibilityOff, MdCategory } from "react-icons/md";
+import {
+  MdEmail,
+  MdVisibility,
+  MdVisibilityOff,
+  MdCategory,
+} from "react-icons/md";
 import { CgGenderMale } from "react-icons/cg";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -23,7 +28,6 @@ const Register = () => {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-
 
   // Function to handle registration
   const handleregister = async () => {
@@ -103,7 +107,7 @@ const Register = () => {
       const response = await axios.post("http://localhost:5000/send-otp", {
         email,
       });
-      console.log(response.data)
+      console.log(response.data);
       if (response.data.success) {
         setOTPSent(response.data.recived_otp);
       } else {
@@ -124,18 +128,18 @@ const Register = () => {
     const dob = document.getElementById("dob").value;
     const gender = document.getElementById("gender").value;
     const category = document.getElementById("category").value;
-    console.log(name, password, email, phone, role, dob, gender, category)
+    console.log(name, password, email, phone, role, dob, gender, category);
 
     try {
       const response = await axios.post("http://localhost:5000/register", {
-        'name': name,
-        'email': email,
-        'mobile': phone,
-        'password': password,
-        'role': role,
-        'dob': dob,
-        'gender': gender,
-        'category': category
+        name: name,
+        email: email,
+        mobile: phone,
+        password: password,
+        role: role,
+        dob: dob,
+        gender: gender,
+        category: category,
       });
       if (response.status === 200) {
         toast.success("Registration successful!");
@@ -148,7 +152,7 @@ const Register = () => {
     } catch (error) {
       toast.error(
         "Registration failed: " +
-        (error.response?.data?.message || "Unknown Error")
+          (error.response?.data?.message || "Unknown Error")
       );
       console.error("Registration error:", error);
     }
@@ -157,13 +161,12 @@ const Register = () => {
   // Function to handle OTP submission
   const handleOTPSubmit = (otp) => {
     try {
-      console.log(otp, otpSent)
+      console.log(otp, otpSent);
 
       if (otp == otpSent) {
         completeRegistration(); // Proceed with registration if OTP is verified
         setIsOTPPopupOpen(false);
-      }
-      else {
+      } else {
         toast.error("OTP verification failed, please try again.");
         //setIsOTPPopupOpen(true); // Reopen the popup for a retry
       }
@@ -353,13 +356,33 @@ const Register = () => {
                       Gender
                     </label>
                     <div className="flex bg-slate-50 border p-3 rounded">
-                      <CgGenderMale className='mr-3 text-xl' />
-                      <select className="bg-transparent border-none border-b-gray-300 text-slate-600 sm:text-sm -md outline-none block w-full  "
-                        name="gender" id="gender">
-                        <option className='rounded-none text-gray-900' value="">Selet gender</option>
-                        <option className='rounded-none text-gray-900' value="Male">Male</option>
-                        <option className='rounded-none text-gray-900' value="Female">Female</option>
-                        <option className='rounded-none text-gray-900' value="Other">Other</option>
+                      <CgGenderMale className="mr-3 text-xl" />
+                      <select
+                        className="bg-transparent border-none border-b-gray-300 text-slate-600 sm:text-sm -md outline-none block w-full  "
+                        name="gender"
+                        id="gender"
+                      >
+                        <option className="rounded-none text-gray-900" value="">
+                          Selet gender
+                        </option>
+                        <option
+                          className="rounded-none text-gray-900"
+                          value="Male"
+                        >
+                          Male
+                        </option>
+                        <option
+                          className="rounded-none text-gray-900"
+                          value="Female"
+                        >
+                          Female
+                        </option>
+                        <option
+                          className="rounded-none text-gray-900"
+                          value="Other"
+                        >
+                          Other
+                        </option>
                       </select>
                     </div>
                   </div>
@@ -372,17 +395,36 @@ const Register = () => {
                       Category
                     </label>
                     <div className="flex bg-slate-50 border p-3 rounded">
-                      <MdCategory className='mr-3 text-xl' />
-                      <select className="bg-transparent border-none border-b-gray-300 text-slate-600 sm:text-sm -md outline-none block w-full "
-                        name="category" id="category">
-                        <option className='rounded-none text-gray-900' value="">Selet a category</option>
-                        <option className='rounded-none text-gray-900' value="General">General</option>
-                        <option className='rounded-none text-gray-900' value="SC/ST">SC/ST</option>
-                        <option className='rounded-none text-gray-900' value="OBC">OBC</option>
+                      <MdCategory className="mr-3 text-xl" />
+                      <select
+                        className="bg-transparent border-none border-b-gray-300 text-slate-600 sm:text-sm -md outline-none block w-full "
+                        name="category"
+                        id="category"
+                      >
+                        <option className="rounded-none text-gray-900" value="">
+                          Selet a category
+                        </option>
+                        <option
+                          className="rounded-none text-gray-900"
+                          value="General"
+                        >
+                          General
+                        </option>
+                        <option
+                          className="rounded-none text-gray-900"
+                          value="SC/ST"
+                        >
+                          SC/ST
+                        </option>
+                        <option
+                          className="rounded-none text-gray-900"
+                          value="OBC"
+                        >
+                          OBC
+                        </option>
                       </select>
                     </div>
                   </div>
-
                 </div>
               </div>
 

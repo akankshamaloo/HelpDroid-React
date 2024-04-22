@@ -5,7 +5,7 @@ import json
 import tempfile
 from app.crypto.triple_des import decrypted, encrypted
 from app.features.notification import *
-from datetime import datetime, timedelta
+from datetime import datetime,timezone,timedelta
 from bson.objectid import ObjectId
 import base64
 from pymongo import ReturnDocument
@@ -23,24 +23,152 @@ db = client['HelpDroid']
 
 # Replace with your collection name
 collection = db['User']
+collection2 = db['user_registered']
 
 # Insert a document into the collection
 
-def insert_data(email,password,mobile,name,role,dob,gender,category):
+def insert_data(email,password,mobile,name,role,dob,gender,category,specialization,fees,experience):
     # data = {'email': email, 'password': password,'mobile':mobile, 'name': name}
     # collection.insert_one(data)
     try:        
         hash = sha256.sha256(password+""+email)        
         data = {'email': email, 'password': hash,'mobile':mobile, 'name': name, 'role':role,'dob':dob,'gender':gender,'category':category}
+        if role:
+            data.update({
+                'specialization': specialization,
+                'fees': fees,
+                'experience': experience
+            })
         print(data)
         id=collection.insert_one(data)
         print("Inserted")
+        if(id.inserted_id):
+            update_registration_stats(role)
         print(id)
         return id.inserted_id
     except Exception as e:
-        print(f"Error:  ",e)
+        print(f"Error:  (An error occurred)")
+def update_data(user_id, updates):
+    try:
+        # Prepare the update document
+        update_doc = {'$set': updates}
+        print("user_id",user_id)
+        # Perform the update operation
+        result = collection.update_one({'_id': ObjectId(user_id)}, update_doc)
+        
+        # Check if the document was successfully updated
+        if result.matched_count > 0:
+            print(f"Successfully updated document: {user_id}")
+            if result.modified_count > 0:
+                print(f"Modified fields: {updates}")
+            else:
+                print("No fields were modified (submitted values may be the same as existing values).")
+        else:
+            print("No document matches the provided ID.")
+        
+        return result.matched_count > 0  # Returns True if the update was successful, False otherwise
+    except Exception as e:
+        print(f"Error updating document: {e}")
+        return False
+def delete_data_by_id(document_id):
+    try:
+        # Convert string ID to ObjectId for MongoDB
+        if isinstance(document_id, str):
+            document_id = ObjectId(document_id)
 
+        # Perform the delete operation
+        result = collection.delete_one({'_id': document_id})
+
+        # Check if the document was successfully deleted
+        if result.deleted_count > 0:
+            print("Document successfully deleted.")
+            return True
+        else:
+            print("No document found with that ID.")
+            return False
+    except Exception as e:
+        print(f"Error deleting document: {e}")
+        return False
+def count_todays_appointments():
+
+    today = datetime.now()
+    start_of_today = datetime(today.year, today.month, today.day, 0, 0, 0)
+    end_of_today = datetime(today.year, today.month, today.day, 23, 59, 59)
+    
+    # MongoDB aggregation to unwind the appointments array and match appointments by today's date
+    pipeline = [
+        {'$unwind': '$appointment'},  # Unwind the appointments array to process each appointment
+        {'$match': {
+            'appointment.date': {
+                '$gte': start_of_today,
+                '$lte': end_of_today
+            }
+        }},
+        {'$count': 'total_appointments_for_today'}  # Count the total appointments for today
+    ]
+    
+    # Execute the aggregation pipeline
+    result = list(collection.aggregate(pipeline))
+    
+    # Handle the case where no appointments are found for today
+    if result:
+        return result[0]['total_appointments_for_today']
+    else:
+        return 0
+
+def update_registration_stats(role):
+    today_date = datetime.now().date().isoformat() 
+    if role:
+        increment_field = 'doctor'
+        ensure_field = 'patient'
+    else:
+        increment_field = 'patient'
+        ensure_field = 'doctor'
+
+    # Update the stats document for today's date
+    update_result = collection2.update_one(
+        {'date': today_date},
+        {
+            '$inc': {increment_field: 1},  # Increment the count for the active role
+            '$setOnInsert': {ensure_field: 0}  # Ensure the other field exists but only on insert
+        },
+        upsert=True  # Create a new document if one doesn't exist for today's date
+        )
+    
+    if update_result.matched_count == 0:
+        print("A new stats document was created for today.")
+    elif update_result.modified_count > 0:
+        print("Stats document updated for today.")
     # query = {'email': "Jlhn@john"}
+def retrieve_stats():
+    # Calculate the start date (7 days ago) and the end date (today)
+    try:
+        end_date = datetime.now().date()
+        start_date = end_date - timedelta(days=7)
+
+        # Query to find all entries within the date range, inclusive
+        query = {
+            'date': {
+                '$gte': start_date.isoformat(),  # Greater than or equal to start_date
+                '$lte': end_date.isoformat()     # Less than or equal to end_date
+            }
+        }
+
+        # Perform the query and return the result
+        results = collection2.find(query)
+        
+        # Format the results as specified: [{"x": "date", "y": "doctor"}, {"x": "date", "y": "patient"}]
+        formatted_results = []
+        formatted_results.append([])
+        formatted_results.append([])
+        for result in results:
+            formatted_results[0].append({"x": result['date'], "y": result.get('doctor', 0)})
+            formatted_results[1].append({"x": result['date'], "y": result.get('patient', 0)})
+
+        return formatted_results
+    except Exception as e:
+        print(e)
+        return []
 def update(email_input,new_pass):
     filter_criteria = {"email": email_input}
 
@@ -641,20 +769,40 @@ def send_notification(email):
         print("Error")
 
 
-def find_by_role_true(user_role,email):
+def find_by_role_true(user_role):
   
     
     print(user_role)
     # if not user_role :
-        
-    print("FALSE PATIENT")
-    query = {"role": {"$exists": True, "$eq": not user_role}}
-    matching_documents = collection.find(query)
-    print(matching_documents)
-        # Format the results as a list of dictionaries containing 'name' and '_id'
-    results = matching_documents
-    print("res",results)
-    return results
+    try:
+        print("FALSE PATIENT")
+        query = {"role": {"$exists": True, "$eq": not user_role}}
+        matching_documents = collection.find(query)
+        print(matching_documents)
+            # Format the results as a list of dictionaries containing 'name' and '_id'
+        results = [
+                {
+                    'id': str(doc['_id']),
+                    'name': doc.get('name', ""),
+                    'email': doc.get('email', ""),
+                    'mobile': doc.get('mobile', ""),
+                    'category': doc.get('category', ""),
+                    'gender': doc.get('gender', ""),
+                    'dob': doc.get('dob', ""),
+                     **({  # Conditional addition of fields
+                        'specialization': doc.get('specialization', ""),
+                        'experience': doc.get('experience', ""),
+                        'fees': doc.get('fees', "")
+                    } if not user_role else {})
+                    
+                }
+                for doc in matching_documents
+            ]
+        print("Results:", results)
+        return results
+    except Exception as e:
+        print(e)
+        return []
     # else:
     #     print("TRUE DOCTOR")
     #     email_doc = collection.find_one({"email": email})

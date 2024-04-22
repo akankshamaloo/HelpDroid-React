@@ -712,6 +712,7 @@ body {
 
 .sidebar {
   min-width: 200px;
+  height: "100vh";
 }
 
 .gallery {

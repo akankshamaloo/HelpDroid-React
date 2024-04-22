@@ -47,6 +47,12 @@ function MedicationSchedule() {
       days: { Sun: 0, Mon: 0, Tue: 1, Wed: 0, Thu: 1, Fri: 0, Sat: 0 },
     },
   ]);
+  const [loading, setLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -307,7 +313,7 @@ function MedicationSchedule() {
   }
   return (
     <Box sx={{ display: "flex", height: "95vh" }}>
-      <Sidebar OpenSidebar={true} />
+      <Sidebar OpenSidebar={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <Box
         sx={{
           flexGrow: 1,

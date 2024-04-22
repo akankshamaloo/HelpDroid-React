@@ -20,7 +20,7 @@ import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 import Sidebar from "../components/Sidebar";
 import axios from "axios";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 function ContactSchedule() {
   const [contacts, setContacts] = useState([
@@ -39,6 +39,11 @@ function ContactSchedule() {
     email: "",
     mobile: "",
   });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   const validateEmail = (email) => {
     return /\S+@\S+\.\S+/.test(email);
@@ -48,36 +53,33 @@ function ContactSchedule() {
     return /^\d{3}\d{3}\d{4}$/.test(phone);
   };
 
-
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.post("http://localhost:5000/get-contacts", {
-          'email': sessionStorage.getItem('user_email')
-        });
+        const response = await axios.post(
+          "http://localhost:5000/get-contacts",
+          {
+            email: sessionStorage.getItem("user_email"),
+          }
+        );
         console.log(response);
 
         if (response.status === 200) {
           // Add unique IDs to each contact
-          const contactsWithIds = response.data.data.map(contact => ({
+          const contactsWithIds = response.data.data.map((contact) => ({
             ...contact,
-            id: uuidv4()
+            id: uuidv4(),
           }));
           setContacts(contactsWithIds);
         } else {
           toast.error(response.data.message || "Failed to fetch contacts.");
         }
-
       } catch (err) {
         // Handle error
       }
     };
     fetchData();
   }, []);
-
-
-
 
   const handleClickOpen = (contact) => {
     setContactData(contact);
@@ -96,20 +98,21 @@ function ContactSchedule() {
   const handleDelete = async (id) => {
     setContacts(contacts.filter((contact) => contact.id !== id));
     try {
-      console.log(contactData.name)
-      const response = await axios.post("http://localhost:5000/remove-contacts", {
-        'email': sessionStorage.getItem('user_email'),
-        'name': contactData.name,
-      });
-      console.log(response.data)
+      console.log(contactData.name);
+      const response = await axios.post(
+        "http://localhost:5000/remove-contacts",
+        {
+          email: sessionStorage.getItem("user_email"),
+          name: contactData.name,
+        }
+      );
+      console.log(response.data);
       if (response.status === 200) {
         toast.success("Contact deleted successfully");
-      }
-      else {
+      } else {
         toast.error(response.data.message || "Failed to delete contact.");
       }
-    }
-    catch (err) { }
+    } catch (err) {}
   };
 
   const handleSave = async () => {
@@ -129,42 +132,47 @@ function ContactSchedule() {
           contact.id === contactData.id ? contactData : contact
         )
       );
-      console.log(contactData)
+      console.log(contactData);
       try {
-        const response = await axios.post("http://localhost:5000/edit-contacts", {
-          'email': sessionStorage.getItem('user_email'),
-          'email1': contactData.email,
-          'name': contactData.name,
-          'mobile': contactData.mobile,
-        });
-        console.log(response.data)
+        const response = await axios.post(
+          "http://localhost:5000/edit-contacts",
+          {
+            email: sessionStorage.getItem("user_email"),
+            email1: contactData.email,
+            name: contactData.name,
+            mobile: contactData.mobile,
+          }
+        );
+        console.log(response.data);
         if (response.status === 200) {
           toast.success("Contact updated successfully");
-        }
-        else {
+        } else {
           toast.error(response.data.message || "Failed to update contact.");
         }
-      } catch (err) { }
-    }
-    else {
-      setContacts([...contacts, { ...contactData, id: contacts ? contacts.length + 1 : 1 }]);
-      console.log(contactData)
+      } catch (err) {}
+    } else {
+      setContacts([
+        ...contacts,
+        { ...contactData, id: contacts ? contacts.length + 1 : 1 },
+      ]);
+      console.log(contactData);
       try {
-        const response = await axios.post("http://localhost:5000/upload-contacts", {
-          'email': sessionStorage.getItem('user_email'),
-          'email1': contactData.email,
-          'name': contactData.name,
-          'mobile': contactData.mobile,
-        });
-        console.log(response.data)
+        const response = await axios.post(
+          "http://localhost:5000/upload-contacts",
+          {
+            email: sessionStorage.getItem("user_email"),
+            email1: contactData.email,
+            name: contactData.name,
+            mobile: contactData.mobile,
+          }
+        );
+        console.log(response.data);
         if (response.status === 200) {
           toast.success("Contact added successfully");
-        }
-        else {
+        } else {
           toast.error(response.data.message || "Failed to add contact.");
         }
-      } catch (err) { }
-
+      } catch (err) {}
     }
     handleClose();
   };
@@ -209,7 +217,7 @@ function ContactSchedule() {
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
-      <Sidebar OpenSidebar={true} />
+      <Sidebar OpenSidebar={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <Box sx={{ flexGrow: 1, padding: "1rem", overflow: "auto" }}>
         <Button
           variant="contained"

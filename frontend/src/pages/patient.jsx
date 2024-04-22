@@ -5,19 +5,16 @@ import Sidebar from "../components/Sidebar";
 import Home_Comp from "../components/Home_comp";
 
 function Patient() {
-  const [openSidebarToggle, setOpenSidebarToggle] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  const OpenSidebar = () => {
-    setOpenSidebarToggle(!openSidebarToggle);
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
-
   return (
     <div className="grid-container">
-      <Header OpenSidebar={OpenSidebar} />
-      <Sidebar
-        openSidebarToggle={openSidebarToggle}
-        OpenSidebar={OpenSidebar}
-      />
+      {/* <Header OpenSidebar={OpenSidebar} /> */}
+      <Sidebar toggleSidebar={toggleSidebar} OpenSidebar={isSidebarOpen} />
       <Home_Comp />
     </div>
   );
