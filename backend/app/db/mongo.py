@@ -879,12 +879,12 @@ def doc_details(email,specializations,yearsOfExperience,fees,addresses):
                 {"email": email},
                 {
                     "$set": {
-                        "doctor_details": {
-                            "specializations": specializations,
-                            "yearsOfExperience": yearsOfExperience,
+                       
+                            "specialization": specializations,
+                            "experience": yearsOfExperience,
                             "fees": fees,
                             "addresses": addresses
-                        }
+                        
                     }
                 },
                 upsert=False
