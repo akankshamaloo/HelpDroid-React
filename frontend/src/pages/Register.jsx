@@ -13,7 +13,12 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isOTPPopupOpen, setIsOTPPopupOpen] = useState(false);
   const [otpSent, setOTPSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
@@ -21,7 +26,6 @@ const Register = () => {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-
 
   // Function to handle registration
   const handleregister = async () => {
@@ -86,7 +90,7 @@ const Register = () => {
       const response = await axios.post("http://localhost:5000/send-otp", {
         email,
       });
-      console.log(response.data)
+      console.log(response.data);
       if (response.data.success) {
         setOTPSent(response.data.recived_otp);
       } else {
@@ -107,11 +111,11 @@ const Register = () => {
 
     try {
       const response = await axios.post("http://localhost:5000/register", {
-        'name': name,
-        'email': email,
-        'mobile': phone,
-        'password': password,
-        'role': role,
+        name: name,
+        email: email,
+        mobile: phone,
+        password: password,
+        role: role,
       });
       if (response.status === 200) {
         toast.success("Registration successful!");
@@ -124,7 +128,7 @@ const Register = () => {
     } catch (error) {
       toast.error(
         "Registration failed: " +
-        (error.response?.data?.message || "Unknown Error")
+          (error.response?.data?.message || "Unknown Error")
       );
       console.error("Registration error:", error);
     }
@@ -133,13 +137,12 @@ const Register = () => {
   // Function to handle OTP submission
   const handleOTPSubmit = (otp) => {
     try {
-      console.log(otp, otpSent)
+      console.log(otp, otpSent);
 
       if (otp == otpSent) {
         completeRegistration(); // Proceed with registration if OTP is verified
         setIsOTPPopupOpen(false);
-      }
-      else {
+      } else {
         toast.error("OTP verification failed, please try again.");
         //setIsOTPPopupOpen(true); // Reopen the popup for a retry
       }

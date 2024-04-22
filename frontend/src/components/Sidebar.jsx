@@ -9,8 +9,11 @@ import {
   BsMenuButtonWideFill,
   BsFillGearFill,
   BsFillHeartPulseFill,
-  BsFillPersonFill
+  BsFillPersonFill,
+  BsChevronRight,
+  BsChevronLeft,
 } from "react-icons/bs";
+
 import { ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
@@ -18,7 +21,7 @@ import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-function Sidebar({ openSidebarToggle, OpenSidebar }) {
+function Sidebar({ OpenSidebar, toggleSidebar }) {
   const [role, setRole] = useState(sessionStorage.getItem("role") + "");
   const [clickedSection, setClickedSection] = useState("");
   const handleClickSection = (section) => {
@@ -27,12 +30,9 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
   const handleEmergency = async () => {
     console.log("Emergency");
     try {
-      const response = await axios.post(
-        "http://localhost:5000/emergency",
-        {
-          email: sessionStorage.getItem("user_email"),
-        }
-      );
+      const response = await axios.post("http://localhost:5000/emergency", {
+        email: sessionStorage.getItem("user_email"),
+      });
       console.log(response.data);
       if (response.status === 200) {
         console.log("success");
@@ -40,27 +40,31 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
       } else {
         toast.error("Error in notifying your loved ones. Please try again.");
       }
-    } catch (err) { }
-  }
+    } catch (err) {}
+  };
   //true doctor
   //false patient
-  return (
+  // if (!OpenSidebar)
+  //   return (
+  //     <span className="icon" onClick={toggleSidebar}>
+  //       {OpenSidebar ? <BsChevronLeft /> : <BsChevronRight />}
+  //     </span>
+  //   );
 
+  return (
     <aside
       id="sidebar"
-      className={openSidebarToggle ? "sidebar-responsive" : ""}
+      className={OpenSidebar ? "sidebar-expanded" : "sidebar-collapsed"}
     >
       <div className="sidebar-title">
         <div className="sidebar-brand">
           <LocalHospitalIcon className="icon_header" /> HelpDroid
+          {/* <span className="icon" onClick={toggleSidebar}>
+            {OpenSidebar ? <BsChevronLeft /> : <BsChevronRight />}
+          </span> */}
         </div>
-        <span className="icon close_icon" onClick={OpenSidebar}>
-          X
-        </span>
       </div>
-
       <ul className="sidebar-list">
-
         {role == "false" ? (
           <>
             <li className="sidebar-list-item">

@@ -6,8 +6,12 @@ import FullScreenLoader from "../components/Loading";
 function DisplayImages() {
   const [images, setImages] = useState([]);
   const [viewImage, setViewImage] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   useEffect(() => {
     const fetchImages = async () => {
       try {
@@ -85,7 +89,11 @@ function DisplayImages() {
 
   return (
     <div className="container">
-      <Sidebar OpenSidebar={true} style={{ height: "100vh" }} />
+      <Sidebar
+        OpenSidebar={isSidebarOpen}
+        toggleSidebar={toggleSidebar}
+        style={{ height: "100vh" }}
+      />
       <div className="gallery">
         {images?.map((base64Image, index) => (
           <div key={index} className="image-card">

@@ -10,7 +10,7 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 
 def setup_routes(app):
     # Set the folder where uploaded files will be stored
-    app.config['UPLOAD_FOLDER'] = r'C:\Users\akank'
+    app.config['UPLOAD_FOLDER'] = r'C:\Users\sonad'
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Optional: Set a limit to the upload size
 
     # Ensure the upload directory exists
@@ -510,3 +510,15 @@ def setup_routes(app):
                 return jsonify({'data': 'Appointment update failed'}), 401
         except Exception as e:
             return jsonify({'data': str(e)}), 500
+    
+    @app.route('/send-sms', methods=['POST'])
+    def send_message():
+        email = request.json.get('email')
+      
+        if not email:
+            return jsonify({'success': False, 'message': 'Email is required'}), 400       
+        try:
+           
+            return jsonify({'success': True, 'message': 'Sent successfully'}), 200
+        except Exception as e:
+            return jsonify({'success': False, 'message': str(e)}), 500

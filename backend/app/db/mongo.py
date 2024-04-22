@@ -23,6 +23,7 @@ db = client['HelpDroid']
 
 # Replace with your collection name
 collection = db['User']
+collection2 = db['user_registered']
 
 # Insert a document into the collection
 
@@ -35,11 +36,27 @@ def insert_data(email,password,mobile,name,role):
         print(data)
         id=collection.insert_one(data)
         print("Inserted")
+        if(id.inserted_id):
+            update_registration_stats(role)
         print(id)
         return id.inserted_id
     except Exception as e:
         print(f"Error:  (An error occurred)")
+def update_registration_stats(role):
+    today_date = datetime.now().date().isoformat() 
+    role_field = 'doctor' if role else 'patient'
 
+    # Update the stats document for today's date, incrementing the appropriate count
+    update_result = collection2.update_one(
+        {'date': today_date},
+        {'$inc': {role_field: 1}},
+        upsert=True  # Create a new document if one doesn't exist for today's date
+    )
+    
+    if update_result.matched_count == 0:
+        print("A new stats document was created for today.")
+    elif update_result.modified_count > 0:
+        print("Stats document updated for today.")
     # query = {'email': "Jlhn@john"}
 def update(email_input,new_pass):
     filter_criteria = {"email": email_input}

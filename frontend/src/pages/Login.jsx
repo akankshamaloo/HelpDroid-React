@@ -13,7 +13,12 @@ const Login = () => {
   const [isvisible, setIsvisible] = useState(false);
   const [active, setActive] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   const handleOpenModal = () => setModalOpen(true);
   const handleCloseModal = () => setModalOpen(false);
   const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
@@ -114,7 +119,7 @@ const Login = () => {
       } catch (error) {
         toast.error("Invalid Credentials");
       }
-    } catch (error) { }
+    } catch (error) {}
   };
 
   const send_notify = async (email) => {

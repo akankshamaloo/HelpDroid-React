@@ -7,11 +7,11 @@ import {
   BsJustify,
 } from "react-icons/bs";
 
-function Header({ OpenSidebar }) {
+function Header({ OpenSidebar, toggleSidebar }) {
   return (
     <header className="header">
       <div className="menu-icon">
-        <BsJustify className="icon" onClick={OpenSidebar} />
+        <BsJustify className="icon" onClick={toggleSidebar} />
       </div>
       <div className="header-left">
         <BsSearch className="icon" />

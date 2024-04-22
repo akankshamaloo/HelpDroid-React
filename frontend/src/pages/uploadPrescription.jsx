@@ -7,7 +7,12 @@ import "react-toastify/dist/ReactToastify.css";
 
 function PrescriptionUploadPage() {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
   };
@@ -64,7 +69,7 @@ function PrescriptionUploadPage() {
 
   return (
     <Box sx={{ display: "flex", height: "100vh", backgroundColor: "#000000" }}>
-      <Sidebar OpenSidebar={true} />
+      <Sidebar OpenSidebar={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <Paper
         elevation={3}
         sx={{

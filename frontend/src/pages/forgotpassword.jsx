@@ -34,7 +34,7 @@ export const ForgotPasswordModal = ({ open, onClose }) => {
       const response = await axios.post("http://localhost:5000/send-otp", {
         email,
       });
-      console.log(response.data)
+      console.log(response.data);
       if (response.data.success) {
         setOTPSent(response.data.recived_otp);
         toast.success("OTP sent to your email");
@@ -70,7 +70,7 @@ export const ForgotPasswordModal = ({ open, onClose }) => {
       const response = await axios.post("http://localhost:5000/send-otp", {
         email,
       });
-      console.log(response.data)
+      console.log(response.data);
       if (response.data.success) {
         setOTPSent(response.data.recived_otp);
       } else {
@@ -91,19 +91,20 @@ export const ForgotPasswordModal = ({ open, onClose }) => {
     // TODO: Implement reset password logic
     console.log("Password reset for:", email);
     try {
-      const response = await axios.post("http://localhost:5000/forgot-password", {
-        'email': email,
-        'password': newPassword,
-      });
-      console.log(response)
+      const response = await axios.post(
+        "http://localhost:5000/forgot-password",
+        {
+          email: email,
+          password: newPassword,
+        }
+      );
+      console.log(response);
       if (!response.data.success) {
         toast.error(response.data.message || "Failed to reset password.");
-      }
-      else {
+      } else {
         toast.success("Password has been reset");
       }
-    }
-    catch (error) {
+    } catch (error) {
       toast.error("Failed to reset password.");
     }
     onClose(); // Close the modal

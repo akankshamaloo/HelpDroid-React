@@ -5,19 +5,18 @@ import Sidebar from "../components/Sidebar";
 import Home_Comp from "../components/Home_comp";
 
 function Home() {
-  const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const OpenSidebar = () => {
-    setOpenSidebarToggle(!openSidebarToggle);
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   return (
     <div className="grid-container">
-      <Header OpenSidebar={OpenSidebar} />
-      <Sidebar
-        openSidebarToggle={openSidebarToggle}
-        OpenSidebar={OpenSidebar}
-      />
+      <Header OpenSidebar={toggleSidebar} />
+      <Sidebar toggleSidebar={toggleSidebar} OpenSidebar={isSidebarOpen} />
+
       <Home_Comp />
     </div>
   );
