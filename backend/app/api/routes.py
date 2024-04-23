@@ -29,8 +29,8 @@ def setup_routes(app):
         gender = data.get('gender')
         category = data.get('category')
         specialization = data.get('specialization','')
-        fees = data.get('fees','')
-        experience = data.get('experience','')
+        fees = data.get('fees',0)
+        experience = data.get('experience',0)
         
 
         print(data)
