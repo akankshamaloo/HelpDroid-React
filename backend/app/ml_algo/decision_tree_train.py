@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-import decision_tree
 import pickle
+from app.ml_algo import decision_tree
 
 def train_test_split(X, y, random_state=41, test_size=0.2):
     """

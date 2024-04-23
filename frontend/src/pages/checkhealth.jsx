@@ -27,23 +27,55 @@ const CheckHealth = () => {
         pulse: '',
         oxygen: ''
     });
+    const [msg, setMsg] = useState("");
+    const [score, setScore] = useState("");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
-    const handleFetchData = () => {
+    const handleFetchData = async () => {
         // This is where you would actually call your API to get the data
         // For now, we're just using dummy data
         // setData(newData);
+        try {
+            const currentDate = new Date().toISOString().slice(0, 10);
+            const response = await axios.post("http://localhost:5000/check-score", {
+                email: sessionStorage.getItem("user_email"),
+                date: currentDate,
+            });
+            console.log(response)
+            if (response.status === 200) {
+                toast.success("Score successful!");
+                const responseData = response.data;
+                setData({
+                    temperature: responseData.temperature || '', // Assuming temperature is in responseData
+                    pulse: responseData.pulse || '', // Assuming pulse is in responseData
+                    oxygen: responseData.spo2 || '', // Assuming oxygen is in responseData
+                });
+                setMsg(responseData.msg || '');
+                setScore(responseData.condition || '');
+
+            } else {
+                toast.error(response.data.message || "scroe failed.");
+            }
+        } catch (error) {
+            toast.error(
+                "score failed: " +
+                (error.response?.data?.message || "Unknown Error")
+            );
+            console.error("score error:", error);
+        }
     };
 
     return (
         <div className="container">
             <Sidebar OpenSidebar={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, p: 2, borderRadius: 2 }}>
-                <Box>
+
+            <Grid container spacing={2} sx={{ p: 2 }}>
+                {/* Left Grid with Cards */}
+                <Grid item xs={12} md={5}>
                     <Card sx={{ width: '500px', height: '180px', background: '#091d52', color: '#fff', position: 'relative' }}>
                         <CardContent>
                             <div style={{
@@ -94,7 +126,7 @@ const CheckHealth = () => {
                                     transform: 'translate(-50%, -50%)', // Center the text properly
                                 }}
                             >
-                                {data.temperature || '90.89'} {/* Assuming '90' is a placeholder for temperature data */}
+                                {data.temperature} {/* Assuming '90' is a placeholder for temperature data */}
                             </Typography>
                         </CardContent>
                     </Card>
@@ -150,7 +182,7 @@ const CheckHealth = () => {
                                     transform: 'translate(-50%, -50%)', // Center the text properly
                                 }}
                             >
-                                {data.pulse || '90.89'} {/* Assuming '90' is a placeholder for temperature data */}
+                                {data.pulse} {/* Assuming '90' is a placeholder for temperature data */}
                             </Typography>
 
                         </CardContent>
@@ -168,7 +200,7 @@ const CheckHealth = () => {
                                 background: '#ccc'
                             }}></div>
 
-                            <Typography variant="h6">TEMPERATURE</Typography>
+                            <Typography variant="h6">SPO2</Typography>
                             <img
                                 src={iconOxygen}
                                 alt="Icon"
@@ -207,26 +239,17 @@ const CheckHealth = () => {
                                     transform: 'translate(-50%, -50%)', // Center the text properly
                                 }}
                             >
-                                {data.temperature || '90.89'} {/* Assuming '90' is a placeholder for temperature data */}
+                                {data.temperature} {/* Assuming '90' is a placeholder for temperature data */}
                             </Typography>
                         </CardContent>
                     </Card>
+                </Grid>
 
-                    {/* Other cards for EDA and Heart Rate similar to the above */}
-
-                </Box>
-                <ResponsiveContainer width="50%">
-                    <Paper
-                        elevation={3}
-                        className="health-parameters"
-                        style={{
-                            margin: "1rem",
-                            padding: "1rem",
-                            backgroundColor: "#fff0f0",
-                        }}
-                    >
+                {/* Right Grid for the Health Status Paper */}
+                <Grid item xs={12} md={6}>
+                    <Paper elevation={3} sx={{ padding: '1rem', backgroundColor: "#fff0f0" }}>
                         <Card>
-                            <CardContent>
+                            <CardContent >
                                 <Typography
                                     variant="h6"
                                     component="div"
@@ -238,26 +261,29 @@ const CheckHealth = () => {
                                     variant="body2"
                                     style={{ marginBottom: "0.5rem", fontSize: "1rem" }}
                                 >
-                                    <MdCreditScore /> Condition: { }
+                                    <MdCreditScore /> Condition: {score}
                                 </Typography>
                                 <Typography
                                     variant="body2"
                                     style={{ marginBottom: "0.5rem", fontSize: "1rem" }}
                                 >
-                                    < MdOutlineMessage /> Message: { }
+                                    < MdOutlineMessage /> Message: {msg}
                                 </Typography>
                             </CardContent>
                         </Card>
                     </Paper>
-                </ResponsiveContainer>
-            </Box>
+                </Grid>
+
+
+            </Grid>
+
             <Button
                 variant="contained"
                 color="primary"
                 sx={{ position: 'absolute', bottom: 16, right: 16 }}
                 onClick={handleFetchData}
             >
-                Refresh Data
+                Check Health Parameters
             </Button>
         </div>
     )

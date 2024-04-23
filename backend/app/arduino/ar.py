@@ -34,16 +34,25 @@ def arduino():
                 #print("pulse",pulse)
                 p[0]=pulse
 
-                index_of_colon = p[1].find(':')
+                q=p[1].split('/')
+                index_of_colon = q[0].find(':')
                 # Find the index of 'b'
-                index_of_b = p[1].find('%')
+                index_of_b = q[0].find('%')
                 # Extract the substring
-                popct = p[1][index_of_colon+1:index_of_b]  # +1 to start after the colon
+                popct = q[0][index_of_colon+1:index_of_b]  # +1 to start after the colon
                 #print("spo2",popct)
                 p[1]=popct
 
+                index_of_colon = q[1].find(':')
+                # Find the index of 'b'
+                index_of_b = q[1].find('')
+                # Extract the substring
+                popct = q[1][index_of_colon+1:index_of_b]  # +1 to start after the colon
+                #print("spo2",popct)
+                p[2]=popct
+
                 p=np.array(p, dtype=np.float64)
-                if(p[0]>0 and p[1]>0):
+                if(p[0]>0 and p[1]>0 and p[2]>0):
                     print(p)
                     return p
                 #print(p)break

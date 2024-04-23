@@ -7,10 +7,11 @@ import os
 from app.features.location import *
 from app.features.sms import *
 from flask_socketio import SocketIO, emit, join_room, leave_room
+from app.crypto.prediction import *
 
 def setup_routes(app):
     # Set the folder where uploaded files will be stored
-    app.config['UPLOAD_FOLDER'] = r'C:\Users\sonad'
+    app.config['UPLOAD_FOLDER'] = r'C:\Users\akank'
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Optional: Set a limit to the upload size
 
     # Ensure the upload directory exists
@@ -604,6 +605,63 @@ def setup_routes(app):
         except Exception as e:
             return jsonify({'data': str(e)}), 500
         
-    
-    
+    def health(email,spo2,pulse,temp,date):
+        data=request.get_json()
+        email=data.get('email')
+        date=data.get('date')
+        
+        if not email or not spo2 or not pulse or not temp:
+            return jsonify({'data': 'Missing required fields'}), 400
+        
+        try:
+            success=insert_health(email,spo2,pulse,temp,date)
+            if success:
+                return True
+            else:
+                return False
+            
+        except Exception as e:
+            return False
 
+    @app.route('/check-score',methods=['POST'])
+    def check_score():
+        print(request.json)
+        email=request.json.get('email')
+        date=request.json.get('date')
+        try:
+            score,data=hybrid_score()
+            print(score)
+            success=health(email,data[5],data[1],data[0],date)
+            if success:
+                print(score)
+                if(score == 0):
+                    txt="Normal" 
+                    msg="Your health is normal. Stay healthy and happy."           
+                elif(score==1):
+                    txt="Mild"
+                    msg="Your health is mild. Please take care of yourself."
+                elif(score == 2):
+                    txt="Moderate"
+                    msg="Your health is moderate. Please consult a doctor."
+                else:
+                    txt="Severe"
+                    msg="Your health is severe. Please consult a doctor immediately. Your Emergency contacts have been notified."
+                    details= user_details(email)
+                    for contact in details.get("contacts", []):
+                        response=get_location('223.191.62.144')
+                        message="Your closed one have severe health issues please check .\nUser Details:\n Name:"+(details.get("name"))+"\n Mobile "+(details.get("mobile"))+"\n Email:"+(details.get("email"))+ "\nLocation: "+"\nCountry: "+response.get("country_name")+"\nState: "+response.get("region")+"\nCity: "+response.get("city")+"\nLatitude: "+str(response.get("latitude"))+"\nLongitude: "+str(response.get("longitude"))    
+                        if contact.get("email"):
+                            print(contact.get("email"))
+                            #print(message)
+                            send_mail(contact.get("email"),message,"Emergency from HelpDroid")
+                            
+                        if contact.get("mobile"):
+                            print(contact.get("mobile"))
+                            send_sms(contact.get("mobile"),message)
+                
+                return jsonify({'condition': txt, 'msg': msg, 'spo2': data[5], 'pulse': data[1], 'temperature': data[0]}), 200
+            
+        except Exception as e:
+            return jsonify({'data': str(e)}), 500
+
+               

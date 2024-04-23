@@ -944,4 +944,35 @@ def doc_details(email,specializations,yearsOfExperience,fees,addresses):
         print(f"Error: {e}")
         return False
 
+def insert_health(email,spo2,pulse,temp,date):
+    if not email:
+        print("No email found in session.")
+        return
+
+    if not spo2 or not pulse or not temp or not date:
+        print("Missing required data.")
+        return
+    
+    health_data = {"spo2": spo2, "pulse": pulse, "temp": temp, "date": date}
+
+    try:
+        # Update the existing user document to add the contact
+        update_result = collection.update_one(
+            {"email": email},
+            {"$push": {"health": health_data}},
+            upsert=False
+        )
+        
+        if update_result.modified_count > 0:
+            print("Health data inserted successfully.")
+            return True
+        else:
+            print("No update was made.")
+            return False
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+    
+    
+
     
