@@ -47,7 +47,7 @@ def insert_data(email,password,mobile,name,role,dob,gender,category,specializati
         print(id)
         return id.inserted_id
     except Exception as e:
-        print(f"Error:  (An error occurred)")
+        print(f"Error:  (An error occurred)",e)
 def update_data(user_id, updates):
     try:
         # Prepare the update document
@@ -906,12 +906,12 @@ def doc_details(email,specializations,yearsOfExperience,fees,addresses):
                 {"email": email},
                 {
                     "$set": {
-                        "doctor_details": {
-                            "specializations": specializations,
-                            "yearsOfExperience": yearsOfExperience,
+                       
+                            "specialization": specializations,
+                            "experience": yearsOfExperience,
                             "fees": fees,
                             "addresses": addresses
-                        }
+                        
                     }
                 },
                 upsert=False

@@ -6,7 +6,7 @@ import FullScreenLoader from "../components/Loading";
 function DisplayImages() {
   const [images, setImages] = useState([]);
   const [viewImage, setViewImage] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {

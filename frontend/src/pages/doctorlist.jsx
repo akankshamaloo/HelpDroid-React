@@ -3,12 +3,16 @@ import ChatComponent from "../components/chatdialog";
 import IconButton from "@mui/material/IconButton";
 import ChatIcon from "@mui/icons-material/Chat";
 import { DataGrid } from "@mui/x-data-grid";
-import { Box, Drawer } from "@mui/material";
+import { Box, Drawer, Dialog } from "@mui/material";
+import DownloadIcon from "@mui/icons-material/Download"; // Replace with your actual download icon
+import TimelineIcon from "@mui/icons-material/Timeline";
 import Sidebar from "../components/Sidebar";
 import { v4 as uuidv4 } from "uuid"; // Make sure to install uuid to generate unique IDs for each message
 import io from "socket.io-client";
 import axios from "axios";
 import { toast } from "react-toastify";
+import LineChartComponent from "../components/LineChartComponent";
+
 function DoctorList() {
   const [chatOpen, setChatOpen] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
@@ -17,11 +21,50 @@ function DoctorList() {
   const [currentUserId, setCurrentUserId] = useState(
     sessionStorage.getItem("user_id")
   );
+  const [chartDialogOpen, setChartDialogOpen] = useState(false);
 
   const [role, setRole] = useState("" + sessionStorage.getItem("role"));
   // Function to handle the sending of messages
   const [loading, setLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const handleDownload = () => {
+    // Query for the specific svg element if there are multiple SVGs on the page.
+    const svg = document.querySelector(".recharts-surface");
+    if (svg) {
+      const serializer = new XMLSerializer();
+      let source = serializer.serializeToString(svg);
+
+      // Add namespaces.
+      if (source.indexOf('xmlns="http://www.w3.org/2000/svg"') === -1) {
+        source = source.replace(
+          "<svg",
+          '<svg xmlns="http://www.w3.org/2000/svg"'
+        );
+      }
+      if (source.indexOf('xmlns:xlink="http://www.w3.org/1999/xlink"') === -1) {
+        source = source.replace(
+          "<svg",
+          '<svg xmlns:xlink="http://www.w3.org/1999/xlink"'
+        );
+      }
+
+      // Add xml declaration
+      const xml = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+
+      // Convert SVG source to URI data scheme.
+      const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(xml);
+
+      // Create a download link element
+      const downloadLink = document.createElement("a");
+      downloadLink.href = url;
+      downloadLink.download = "chart.svg"; // File name here
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    } else {
+      console.error("Could not find the SVG chart element for downloading.");
+    }
+  };
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -132,6 +175,13 @@ function DoctorList() {
     };
     socket.emit("send_message", messageData);
   };
+  const handleChartDialogOpen = () => {
+    setChartDialogOpen(true);
+  };
+
+  const handleChartDialogClose = () => {
+    setChartDialogOpen(false);
+  };
 
   const toggleChat = () => {
     setChatOpen(!chatOpen);
@@ -161,23 +211,45 @@ function DoctorList() {
       headerName: role == "true" ? "Patient Name" : "Doctor Name",
       width: 200,
     },
+    {
+      field: "gender",
+      headerName: "Gender",
+      width: 200,
+    },
     ...(role == "true"
       ? []
       : [
-        { field: "specialization", headerName: "Specialization", width: 200 },
-      ]),
+          { field: "specialization", headerName: "Specialization", width: 200 },
+        ]),
     ...(role == "false"
-      ? [
-        { field: "fees", headerName: "Fees Charged", width: 150 },
-      ]
+      ? [{ field: "fees", headerName: "Fees Charged", width: 150 }]
       : []),
     ...(role == "false"
       ? [
-        { field: "yearsOfExperience", headerName: "Years Of Experience", width: 150 },
-      ]
+          {
+            field: "experience",
+            headerName: "Years Of Experience",
+            width: 150,
+          },
+        ]
       : []),
-
-    { field: "contact", headerName: "Contact Number", width: 150 },
+    ...(role == "true"
+      ? [
+          {
+            field: "showGraph",
+            headerName: "Show Graph",
+            width: 130,
+            renderCell: (params) => (
+              <IconButton onClick={handleChartDialogOpen}>
+                <TimelineIcon style={{ color: "white" }} />{" "}
+                {/* Replace with your actual graph icon */}
+              </IconButton>
+            ),
+          },
+        ]
+      : []),
+    ,
+    { field: "mobile", headerName: "Contact Number", width: 150 },
     {
       field: "actions",
       headerName: "Actions",
@@ -221,7 +293,18 @@ function DoctorList() {
             },
           }}
         />
-
+        <Dialog open={chartDialogOpen} onClose={handleChartDialogClose}>
+          <Box sx={{ position: "relative", width: "auto", height: "auto" }}>
+            <LineChartComponent />{" "}
+            {/* Placeholder for your line chart component */}
+            <IconButton
+              onClick={handleDownload} // You need to define this function to handle the download logic
+              sx={{ position: "absolute", right: 0, top: 0 }}
+            >
+              <DownloadIcon />
+            </IconButton>
+          </Box>
+        </Dialog>
         <Drawer
           anchor="right"
           open={chatOpen}
