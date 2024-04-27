@@ -39,6 +39,8 @@ function Home_Comp() {
   const [temperature, setTemperature] = useState(0);
   const [pulse, setPulse] = useState(0);
   const [oxygenLevel, setOxygenLevel] = useState(0);
+  const [graph, setGraph] = useState(0);
+
 
   useEffect(() => {
     const fetchCounts = async () => {
@@ -55,6 +57,16 @@ function Home_Comp() {
           setPrescriptions(response.data.prescription_count);
           setReminders(response.data.medicine_count);
           setDoctors(response.data.chat_count);
+          setGraph(response.data.health_details);
+          const currentDate = new Date().toISOString().slice(0, 10);
+          const todayData = response.data.health_details.find(
+            item => item.date === currentDate
+          );
+          if (todayData) {
+            setTemperature(todayData.temp);
+            setPulse(todayData.pulse);
+            setOxygenLevel(todayData.spo2);
+          }
         }
       } catch (error) {
         console.error("Failed to fetch counts:", error);
@@ -142,7 +154,7 @@ function Home_Comp() {
 
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
-            data={dummyData}
+            data={graph}
             margin={{
               top: 5,
               right: 30,
@@ -164,7 +176,7 @@ function Home_Comp() {
             />
             <Line
               type="monotone"
-              dataKey="temperature"
+              dataKey="temp"
               stroke="#82ca9d"
               strokeWidth={3}
               name="Temperature (°F)"

@@ -363,6 +363,7 @@ def get_user_statistics(email):
     prescription_count = 0
     medicine_count = 0
     unique_receiver_ids = set()
+    health_counts_last_seven_days=[]
 
     try:
         # Retrieve the user document by email
@@ -378,6 +379,23 @@ def get_user_statistics(email):
             if "medication" in user_document:
                 medicine_count = len(user_document["medication"])
 
+            try:
+                    # Calculate the date 7 days ago
+                seven_days_ago = datetime.now() - timedelta(days=7)
+                
+                # Convert date strings in appointments to datetime objects and delete appointments older than 7 days
+                result = collection.update_one(
+                    {"email": email},
+                    {"$pull": {"health": {"date": {"$lt": seven_days_ago.isoformat()}}}}
+                )
+                
+                if result.modified_count > 0:
+                    print("Old health deleted successfully.")
+                else:
+                    print("No health were deleted.")
+                
+            except Exception as e:
+                print(f"An error occurred while deleting health: {e}")
             # Count the number of unique receiver IDs for chats
             if "messages" in user_document:
                 # Iterate over each message group
@@ -385,12 +403,40 @@ def get_user_statistics(email):
                     # Extract unique receiver IDs from the messages
                     unique_receiver_ids.update([message_group["receiver_id"]])
 
+        # Calculate dates for the last 7 days
+        last_seven_days = [(datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
+
+        # Construct the object containing appointment counts for the last 7 days
+        # Construct the object containing appointment counts for the last 7 days
+        for day in last_seven_days:
+            # Find the corresponding record in the database for the current day
+            record = next((item for item in user_document['health'] if item['date'] == day), None)
+            
+            # If a record is found for the current day, extract the required information
+            if record:
+                health_counts_last_seven_days.append({
+                    "date": record["date"],
+                    "spo2": record.get("spo2", None),
+                    "pulse": record.get("pulse", None),
+                    "temp": record.get("temp", None)
+                })
+            else:
+                # If no record is found for the current day, add None values
+                health_counts_last_seven_days.append({
+                    "date": day,
+                    "spo2": None,
+                    "pulse": None,
+                    "temp": None
+                })
+
+
+
         # Return the counts
-        return prescription_count, medicine_count, len(unique_receiver_ids)
+        return prescription_count, medicine_count, len(unique_receiver_ids),health_counts_last_seven_days
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        return 0, 0, 0  # Return zeros in case of any error 
+        return 0, 0, 0 ,[] # Return zeros in case of any error 
 
 def get_doc_statistics(email):
     # Initialize counters

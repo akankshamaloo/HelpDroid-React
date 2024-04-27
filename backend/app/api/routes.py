@@ -279,8 +279,8 @@ def setup_routes(app):
             return jsonify({'data': 'Missing required fields'}), 400
 
         try:
-            prescription_count, medicine_count, chat_count = get_user_statistics(email)
-            return jsonify({'prescription_count': prescription_count, 'medicine_count': medicine_count, 'chat_count': chat_count}), 200
+            prescription_count, medicine_count, chat_count,health_details = get_user_statistics(email)
+            return jsonify({'prescription_count': prescription_count, 'medicine_count': medicine_count, 'chat_count': chat_count,'health_details':health_details}), 200
         except Exception as e:
             return jsonify({'data': str(e)}), 500
         
