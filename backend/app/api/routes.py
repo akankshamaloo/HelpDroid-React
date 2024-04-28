@@ -11,7 +11,7 @@ from app.crypto.prediction import *
 
 def setup_routes(app):
     # Set the folder where uploaded files will be stored
-    app.config['UPLOAD_FOLDER'] = r'C:\Users\akank'
+    app.config['UPLOAD_FOLDER'] = r'C:\Users\sonad'
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Optional: Set a limit to the upload size
 
     # Ensure the upload directory exists
