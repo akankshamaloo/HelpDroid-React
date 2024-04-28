@@ -36,7 +36,7 @@ def hybrid_score():
     try:
         dt_model = load_model("app/ml_algo/decision_tree_model.pkl")
         print("Decision Tree Model loaded")
-        knn_model = load_model("app/ml_algo/knn_weight.pkl")
+        #knn_model = load_model("app/ml_algo/knn_weight.pkl")
         print("Models loaded")
     except Exception as e:
         print("Error loading models:", e)
