@@ -39,10 +39,11 @@ function Sidebar({ OpenSidebar, toggleSidebar }) {
       if (response.status === 200) {
         console.log("success");
         toast.success("EMERGENCY!! your loved ones have been notified");
+        alert("EMERGENCY!! your loved ones have been notified");
       } else {
         toast.error("Error in notifying your loved ones. Please try again.");
       }
-    } catch (err) {}
+    } catch (err) { }
   };
   const handleLogout = () => {
     // Clear sessionStorage
