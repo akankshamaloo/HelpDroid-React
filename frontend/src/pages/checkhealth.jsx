@@ -75,7 +75,7 @@ const CheckHealth = () => {
 
             <Grid container spacing={2} sx={{ p: 2 }}>
                 {/* Left Grid with Cards */}
-                <Grid item xs={12} md={5}>
+                <Grid item xs={12} md={6}>
                     <Card sx={{ width: '500px', height: '180px', background: '#091d52', color: '#fff', position: 'relative' }}>
                         <CardContent>
                             <div style={{
