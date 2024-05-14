@@ -38,7 +38,7 @@ print(acc)
 
 
 # save the iris classification model as a pickle file
-model_pkl_file = "knn_weight.pkl"  
+model_pkl_file = "knn_model.pkl"  
 
 with open(model_pkl_file, 'wb') as file:  
     pickle.dump(clf, file)

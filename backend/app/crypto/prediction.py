@@ -48,8 +48,8 @@ def hybrid_score():
     knn_score = get_score(knn_model, data)
 
     # # Print individual model scores
-    print("Decision Tree Score:", dt_score)
-    print("KNN Score:", knn_score)
+    #print("Decision Tree Score:", dt_score)
+    #print("KNN Score:", knn_score)
 
     # Calculate and print the hybrid score
     hybrid_score = math.floor((dt_score + knn_score) / 2)

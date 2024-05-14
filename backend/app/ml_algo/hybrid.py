@@ -33,9 +33,9 @@ def prepare_data():
 def hybrid_score():
     print("In hybrid_score")
     # Load both models
-    dt_model = load_model("decision_tree_model.pkl")
+    dt_model = load_model("dt_model.pkl")
     print("Decision Tree Model loaded")
-    knn_model = load_model("knn_weight.pkl")
+    knn_model = load_model("knn_model.pkl")
     print("Models loaded")
 
     # Prepare data

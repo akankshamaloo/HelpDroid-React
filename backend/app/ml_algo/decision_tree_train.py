@@ -59,6 +59,6 @@ def accuracy(y_true, y_pred):
 print(f"Model's Accuracy: {accuracy(y_test, predictions)}")
 
 # Save the trained model to a file
-model_pkl_file = "decision_tree_model.pkl"
+model_pkl_file = "dt_model.pkl"
 with open(model_pkl_file, 'wb') as file:
     pickle.dump(model, file)
